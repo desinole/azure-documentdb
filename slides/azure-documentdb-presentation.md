@@ -317,7 +317,7 @@ SELECT * FROM c WHERE c.status = "active"
 
 | **Aspect** | **Capability** | **Limit** |
 |------------|---------------|-----------|
-| Storage | Unlimited | Per partition: 50GB |
+| Storage | Unlimited | Logical partition: 20GB, Physical partition: 50GB |
 | Throughput | 400 - 1M+ RU/s | Virtually unlimited |
 | Partitions | Auto-managed | Transparent scaling |
 | Regions | Multi-region | 30+ Azure regions |
