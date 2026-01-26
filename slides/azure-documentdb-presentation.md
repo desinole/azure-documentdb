@@ -21,7 +21,7 @@ footer: '© 2026'
 
 - **Name:** [Santosh Hari]
 - **Role:** [Azure EngOps - Customer Engineer]
-- **Experience:** [Brief background]
+- **Experience:** Specializes in designing and operating large-scale Azure data platforms and helping enterprises modernize applications with DocumentDB and other cloud-native services.
 - **Connect:** 
   - 💼 LinkedIn: [santoshhari]
   - 📧 Email: [your.email@domain.com]
