@@ -46,10 +46,10 @@ footer: '© 2026'
 
 ## What is Azure DocumentDB?
 
-- **Open Source** distributed document database
+- **Open Source** distributed document database (released 2025)
+- **MongoDB-compatible API** running on **PostgreSQL**
 - Built for **cloud-native** applications
 - Designed for **horizontal scalability**
-- **Multi-model** support (documents, key-value, graph)
 - **ACID transactions** at document and collection level
 - **Global distribution** capabilities
 
@@ -78,12 +78,12 @@ footer: '© 2026'
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
-│         Query Engine                         │
-│  (SQL-like queries, aggregations)           │
+│    MongoDB-Compatible API Layer             │
+│  (MongoDB wire protocol, queries)           │
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
-│         Storage Engine                       │
+│         PostgreSQL Storage Engine           │
 │  (Partitioned, Replicated, Indexed)         │
 └──────────────────────────────────────────────┘
 ```
@@ -94,12 +94,12 @@ footer: '© 2026'
 
 ## Core Components
 
+- **MongoDB API Layer** - wire protocol compatibility
+- **Query Translator** - MongoDB queries to PostgreSQL
 - **Partition Manager** - data distribution across nodes
-- **Replication Layer** - consistency and availability
-- **Index Manager** - automatic indexing of all properties
-- **Query Processor** - SQL-like query execution
-- **Transaction Coordinator** - ACID guarantees
-- **Storage Engine** - efficient document storage
+- **Replication Layer** - PostgreSQL replication for consistency
+- **Index Manager** - leverages PostgreSQL indexing
+- **Transaction Coordinator** - ACID guarantees via PostgreSQL
 
 ---
 
@@ -328,6 +328,7 @@ SELECT * FROM c WHERE c.status = "active"
 
 ## Similarities
 
+- ✅ MongoDB-compatible API (DocumentDB implements MongoDB wire protocol)
 - ✅ Document-oriented data model
 - ✅ Flexible schema (JSON/BSON)
 - ✅ Rich query language
@@ -342,8 +343,9 @@ SELECT * FROM c WHERE c.status = "active"
 
 | **Feature** | **Azure DocumentDB** | **MongoDB** |
 |-------------|---------------------|-------------|
-| **Licensing** | Open Source (Azure) | Open Source + Enterprise |
-| **Consistency** | 5 consistency levels | Eventual/Strong |
+| **Storage Engine** | PostgreSQL | WiredTiger/In-Memory |
+| **Licensing** | Open Source (2025) | Open Source + Enterprise |
+| **API Compatibility** | MongoDB wire protocol | Native MongoDB |
 | **Integration** | Native Azure services | Self-managed or Atlas |
 | **Pricing Model** | RU/s based | Instance/storage based |
 | **Global Distribution** | Built-in multi-region | Requires configuration |
@@ -356,11 +358,12 @@ SELECT * FROM c WHERE c.status = "active"
 ## When to Choose DocumentDB
 
 - 🎯 **Azure-native** applications
+- 🎯 Want **MongoDB compatibility** with **PostgreSQL reliability**
 - 🎯 Need **predictable performance** (RU/s)
-- 🎯 Require **multiple consistency** levels
 - 🎯 Want **turnkey global distribution**
 - 🎯 Prefer **fully managed** service
 - 🎯 Need **comprehensive SLAs**
+- 🎯 Leverage **PostgreSQL ecosystem** and tools
 
 ---
 
@@ -403,12 +406,12 @@ SELECT * FROM c WHERE c.status = "active"
 
 ## The Value Proposition
 
-1. 🚀 **Developer Productivity** - flexible schema, natural data model
-2. ⚡ **Performance** - low latency, predictable throughput
+1. 🚀 **Developer Productivity** - MongoDB API, flexible schema, natural data model
+2. ⚡ **Performance** - PostgreSQL foundation, low latency, predictable throughput
 3. 📈 **Scalability** - horizontal scaling, global distribution
-4. 🔒 **Enterprise Ready** - ACID, security, compliance
+4. 🔒 **Enterprise Ready** - PostgreSQL ACID guarantees, security, compliance
 5. 💰 **Cost Effective** - pay for what you use (RU/s model)
-6. 🌍 **Open Source** - community-driven innovation
+6. 🌍 **Open Source** - released 2025, community-driven innovation
 
 ---
 
@@ -421,7 +424,8 @@ SELECT * FROM c WHERE c.status = "active"
 - **Global applications** need low-latency access everywhere
 - **Data velocity** - need to handle rapid schema changes
 - **DevOps culture** - agility and speed to market
-- **Open source momentum** - community collaboration
+- **Open source momentum** - 2025 release enables community collaboration
+- **PostgreSQL adoption** - leveraging proven database technology
 
 ---
 
