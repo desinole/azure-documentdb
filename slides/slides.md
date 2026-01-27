@@ -32,12 +32,9 @@ footer: '© 2026'
 1. 📌 Introduction to Azure DocumentDB
 2. 🏗️ Architecture Overview
 3. ⚡ Key Features
-4. 💻 **Demo:** Basic CRUD & Schema Flexibility
-5. 🚀 **Demo:** Indexing & Performance
-6. 📈 Scalability with Azure Portal
-7. 🔄 Differentiation: DocumentDB vs MongoDB
-8. 🆚 Differentiation: DocumentDB vs SQL Server
-9. 🎯 Why DocumentDB? Why Now?
+4. 🔄 Differentiation: DocumentDB vs MongoDB
+5. 🆚 Differentiation: DocumentDB vs SQL Server
+6. 🎯 Why DocumentDB? Why Now?
 
 ---
 
@@ -152,74 +149,6 @@ Presenter Notes:
 
 ---
 
-# **Architecture Overview**
-
-## Partitioning Strategy
-
-- **Logical Partitions** - grouped by partition key
-- **Physical Partitions** - distributed across nodes
-- **Automatic splitting** - as data grows
-- **Transparent to applications** - handled internally
-- **Partition key selection** - critical for performance
-
----
-
-# **Key Features**
-
-## 1️⃣ Flexible Schema
-
-- No predefined schema required
-- Documents can have different structures
-- Add/remove fields without migrations
-- Validate with application logic or triggers
-
----
-
-# **Key Features**
-
-## 2️⃣ Automatic Indexing
-
-- **All properties indexed** by default
-- Configurable indexing policies
-- Composite indexes for complex queries
-- Spatial indexes for geo-queries
-- TTL (Time-to-Live) support
-
----
-
-# **Key Features**
-
-## 3️⃣ Rich Query Capabilities
-
-- SQL-like query syntax
-- Joins within document hierarchy
-- Aggregation functions (COUNT, SUM, AVG)
-- Filtering, sorting, pagination
-- Full-text search capabilities
-
----
-
-# **Key Features**
-
-## 4️⃣ Multi-Region Distribution
-
-- **Global replication** across Azure regions
-- **Multiple consistency levels** (Strong, Bounded Staleness, Session, Consistent Prefix, Eventual)
-- **Automatic failover** for high availability
-- **Multi-region writes** for low latency
-
----
-
-# **Key Features**
-
-## 5️⃣ Performance & Scalability
-
-- **Low latency** - single-digit millisecond reads/writes
-- **Predictable performance** - reserved throughput (RU/s)
-- **Elastic scaling** - scale up/down on demand
-- **Unlimited storage and throughput**
-
----
 
 # **Demo Time! 🚀**
 
@@ -288,69 +217,9 @@ Let's see Azure DocumentDB in action:
 }
 ```
 
----
-
-# **Demo Time! 🚀**
-
-## Indexing & Performance Optimization
-
-Exploring DocumentDB's indexing capabilities:
-
-1. **Default indexing** - automatic on all properties
-2. **Custom indexing policies** - optimize for your queries
-3. **Composite indexes** - multi-field queries
-4. **Query performance** - analyze Request Units (RU)
-5. **Index tuning** - include/exclude paths
-
----
-
-# **Demo: Indexing Policy**
-
-## Example Configuration
-
-```json
-{
-  "indexingMode": "consistent",
-  "automatic": true,
-  "includedPaths": [
-    { "path": "/*" }
-  ],
-  "excludedPaths": [
-    { "path": "/largeTextField/*" }
-  ],
-  "compositeIndexes": [
-    [
-      { "path": "/category", "order": "ascending" },
-      { "path": "/price", "order": "descending" }
-    ]
-  ]
-}
-```
-
----
-
-# **Demo: Query Performance**
-
-## Request Units (RU) - The Currency of DocumentDB
-
-- **Point reads** - low RU consumption
-- **Complex queries** - higher RU consumption
-- **Indexes** - reduce RU costs
-- **Partition key** in query - critical for performance
-
-```sql
--- Efficient query (uses partition key)
-SELECT * FROM c WHERE c.userId = "user-001" AND c.category = "orders"
-
--- Less efficient (cross-partition)
-SELECT * FROM c WHERE c.status = "active"
-```
-
----
-
 # **Why Azure DocumentDB Exists**
 
-## The Core Problems We're Solving
+## The Core Problems It Solves
 
 ### Licensing & Open Source
 
@@ -365,7 +234,7 @@ In 2018, MongoDB changed from AGPL to SSPL:
 
 # **Why Azure DocumentDB Exists**
 
-## The Core Problems It's Solving
+## The Core Problems It Solves
 
 ### Avoiding Vendor Lock-In
 
@@ -402,7 +271,7 @@ Presenter Notes:
 
 # **Why Azure DocumentDB Exists**
 
-## The Core Problems It;s Solving
+## The Core Problems It Solves
 
 ### Leveraging Mature Relational Databases
 
@@ -419,7 +288,7 @@ PostgreSQL already provides:
 
 # **Why Azure DocumentDB Exists**
 
-## The Core Problems It's Solving
+## The Core Problems It Solves
 
 ### A Truly Open Alternative
 
@@ -500,69 +369,6 @@ Presenter Notes:
 
 ---
 
-# **Why DocumentDB?**
-
-## The Value Proposition
-
-1. 🚀 **Developer Productivity** - MongoDB API, flexible schema, natural data model
-2. ⚡ **Performance** - PostgreSQL foundation, low latency, predictable throughput
-3. 📈 **Scalability** - horizontal scaling, global distribution
-4. 🔒 **Enterprise Ready** - PostgreSQL ACID guarantees, security, compliance
-5. 💰 **Cost Effective** - pay for what you use (RU/s model)
-6. 🌍 **Open Source** - released 2025, community-driven innovation
-
----
-
-# **Why Now?**
-
-## The Perfect Storm
-
-- **Cloud-native applications** are the new standard
-- **Microservices architecture** requires flexible data stores
-- **Global applications** need low-latency access everywhere
-- **Data velocity** - need to handle rapid schema changes
-- **DevOps culture** - agility and speed to market
-- **Open source momentum** - 2025 release enables community collaboration
-- **PostgreSQL adoption** - leveraging proven database technology
-
----
-
-# **Why Now?**
-
-## Industry Trends
-
-```
-📊 Market Forces Driving Adoption:
-
-- 70% of new apps are cloud-native (2026)
-- Document databases growing 40% YoY
-- NoSQL adoption accelerating in enterprises
-- Hybrid cloud deployments increasing
-- API-first architectures becoming standard
-- Real-time data requirements expanding
-```
-
----
-
-# **Getting Started**
-
-## Quick Start Guide
-
-1. **Create Azure account** (free tier available)
-2. **Provision DocumentDB instance**
-3. **Choose SDK** (.NET, Java, Python, Node.js)
-4. **Install packages**
-   ```bash
-   npm install @azure/cosmos
-   # or
-   pip install azure-cosmos
-   # or
-   dotnet add package Microsoft.Azure.Cosmos
-   ```
-5. **Start building!**
-
----
-
 # **Resources**
 
 ## Learn More
@@ -571,7 +377,6 @@ Presenter Notes:
 - 💻 **GitHub:** [github.com/Azure/azure-documentdb](https://github.com/Azure/azure-documentdb)
 - 🎓 **Learn Path:** Microsoft Learn modules
 - 👥 **Community:** Stack Overflow, GitHub Discussions
-- 📺 **Videos:** Channel 9, Azure Friday
 - 🎯 **Samples:** [Code samples in this repo](../code-samples/)
 
 ---
