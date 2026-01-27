@@ -98,35 +98,57 @@ Presenter Notes:
 
 ```
 
-
-┌─────────────────────────────────────────────┐
-│         Application Layer                   │
-│  (REST API, SDKs: .NET, Java, Python, JS)   │
-└─────────────────┬───────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────┐
-│    MongoDB-Compatible API Layer             │
-│  (MongoDB wire protocol, queries)           │
-└─────────────────┬───────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────┐
-│         PostgreSQL Storage Engine           │
-│  (Partitioned, Replicated, Indexed)         │
-└─────────────────────────────────────────────┘
 ```
-
+<!--
+Presenter Notes:
+- Gateway acts as a protocol translation layer between MongoDB clients and a PostgreSQL backend. 
+- Gateway interprets MongoDB wire protocol, maps commands to PostgreSQL operations
+- Gateway manages session handling, transactions, cursor-based paging, and TLS termination.
+-->
 ---
 
 # **Architecture Overview**
 
 ## Core Components
 
-- **MongoDB API Layer** - wire protocol compatibility
-- **Query Translator** - MongoDB queries to PostgreSQL
-- **Partition Manager** - data distribution across nodes
-- **Replication Layer** - PostgreSQL replication for consistency
-- **Index Manager** - leverages PostgreSQL indexing
-- **Transaction Coordinator** - ACID guarantees via PostgreSQL
+### **pg_documentdb_gw** (Gateway)
+MongoDB wire protocol handler and request router
+
+### **pg_documentdb** (Extension)
+Core MongoDB-compatible functionality in PostgreSQL
+
+### **pg_documentdb_core** (Foundation)
+Low-level BSON processing and document operations
+
+<!--
+Presenter Notes:
+
+**pg_documentdb_gw (Gateway Layer)**
+- Entry point for all MongoDB client connections
+- Handles MongoDB wire protocol translation
+- Manages connection pooling and load balancing
+- Performs TLS termination and authentication
+- Routes requests to appropriate PostgreSQL instances
+- Think of it as the "adapter" between MongoDB clients and PostgreSQL backend
+
+**pg_documentdb (PostgreSQL Extension)**
+- The main extension loaded into PostgreSQL
+- Implements MongoDB query language and commands
+- Provides collection management (create, drop, list)
+- Handles CRUD operations (insert, find, update, delete)
+- Implements aggregation pipeline
+- Manages indexes and query optimization
+- This is where MongoDB semantics meet PostgreSQL storage
+
+**pg_documentdb_core (Core Library)**
+- Foundational layer for document processing
+- BSON (Binary JSON) encoding/decoding
+- Document validation and schema enforcement
+- Low-level data type conversions
+- Efficient document storage structures
+- Shared library used by both gateway and extension
+- Performance-critical path for all document operations
+-->
 
 ---
 
@@ -326,106 +348,155 @@ SELECT * FROM c WHERE c.status = "active"
 
 ---
 
-# **Scalability with Azure Portal**
+# **Why Azure DocumentDB Exists**
 
-## Elastic Throughput Management
+## The Core Problems We're Solving
 
-- **Provision throughput** - at database or collection level
-- **Autoscale** - automatically adjust RU/s
-- **Monitor metrics** - RU consumption, latency, availability
-- **Scale horizontally** - add partitions as data grows
-- **Scale vertically** - increase RU/s for higher throughput
+### Licensing & Open Source
 
----
+In 2018, MongoDB changed from AGPL to SSPL:
+- Not OSI-approved
+- Unacceptable for enterprises, governments, Linux distributions
+- Creates legal/compliance risk for vendors and cloud providers
 
-# **Scalability with Azure Portal**
-
-## Scaling Options
-
-| **Aspect** | **Capability** | **Limit** |
-|------------|---------------|-----------|
-| Storage | Unlimited | Logical partition: 20GB, Physical partition: 50GB |
-| Throughput | 400 - 1M+ RU/s | Virtually unlimited |
-| Partitions | Auto-managed | Transparent scaling |
-| Regions | Multi-region | 30+ Azure regions |
+**Result:** Organizations want MongoDB's API—not its licensing terms.
 
 ---
 
-# **Differentiation: DocumentDB vs MongoDB**
+# **Why Azure DocumentDB Exists**
 
-## Similarities
+## The Core Problems It's Solving
 
-- ✅ MongoDB-compatible API (DocumentDB implements MongoDB wire protocol)
-- ✅ Document-oriented data model
-- ✅ Flexible schema (JSON/BSON)
-- ✅ Rich query language
-- ✅ Horizontal scalability
-- ✅ Indexing capabilities
+### Avoiding Vendor Lock-In
 
----
+Teams built large applications around MongoDB's:
+- Query language
+- Drivers  
+- Data model
 
-# **Differentiation: DocumentDB vs MongoDB**
+**Rewriting is expensive and risky.**
 
-## Key Differences
+Azure DocumentDB offers:
+- ✅ Zero or near-zero code changes
+- ✅ Same MongoDB drivers
+- ✅ Same queries
+- ✅ Different backend (PostgreSQL)
+- ✅ **Exit optionality**
 
-| **Feature** | **Azure DocumentDB** | **MongoDB** |
-|-------------|---------------------|-------------|
-| **Storage Engine** | PostgreSQL | WiredTiger/In-Memory |
-| **Licensing** | Open Source (2025) | Open Source + Enterprise |
-| **API Compatibility** | MongoDB wire protocol | Native MongoDB |
-| **Integration** | Native Azure services | Self-managed or Atlas |
-| **Pricing Model** | RU/s based | Instance/storage based |
-| **Global Distribution** | Built-in multi-region | Requires configuration |
-| **SLA** | 99.999% availability | Depends on deployment |
-
----
-
-# **Differentiation: DocumentDB vs MongoDB**
-
-## When to Choose DocumentDB
-
-- 🎯 **Azure-native** applications
-- 🎯 Want **MongoDB compatibility** with **PostgreSQL reliability**
-- 🎯 Need **predictable performance** (RU/s)
-- 🎯 Want **turnkey global distribution**
-- 🎯 Prefer **fully managed** service
-- 🎯 Need **comprehensive SLAs**
-- 🎯 Leverage **PostgreSQL ecosystem** and tools
+<!--
+Presenter Notes:
+- MongoDB's 2018 license change (AGPL to SSPL) created major issues for enterprises
+- SSPL is not recognized as "open source" by OSI - this matters for procurement and compliance
+- Many governments and regulated industries cannot use SSPL-licensed software
+- Linux distributions (Red Hat, Debian, Ubuntu) removed MongoDB from their repos
+- Legal departments flag SSPL as high-risk for SaaS companies
+- The core insight: teams love MongoDB's developer experience but want freedom from MongoDB Inc.
+- Vendor lock-in is real: once you've built on MongoDB, switching databases means rewriting everything
+- Migration risk: rewriting queries, retesting, potential data loss, business disruption
+- Azure DocumentDB decouples the API from the product - you get MongoDB compatibility without MongoDB
+- Exit strategy: if you need to move off managed MongoDB, you have options
+- This is strategic: avoid single-vendor dependency for critical infrastructure
+-->
 
 ---
 
-# **Differentiation: DocumentDB vs SQL Server**
+# **Why Azure DocumentDB Exists**
 
-## Fundamental Differences
+## The Core Problems It;s Solving
 
-| **Aspect** | **DocumentDB** | **SQL Server** |
-|------------|----------------|----------------|
-| **Data Model** | Document (JSON) | Relational (Tables) |
-| **Schema** | Flexible/Dynamic | Fixed/Predefined |
-| **Scaling** | Horizontal (sharding) | Vertical (bigger servers) |
-| **Queries** | SQL-like + document | ANSI SQL |
-| **Transactions** | Document/collection | Database-wide |
-| **Best For** | Unstructured/semi-structured | Structured data |
+### Leveraging Mature Relational Databases
+
+PostgreSQL already provides:
+- ACID transactions
+- Strong consistency
+- Battle-tested durability
+- Rich indexing
+- Decades of operational tooling
+
+**Azure DocumentDB = MongoDB ergonomics + PostgreSQL reliability**
 
 ---
 
-# **Differentiation: DocumentDB vs SQL Server**
+# **Why Azure DocumentDB Exists**
 
-## Complementary, Not Competing
+## The Core Problems It's Solving
 
-**Use DocumentDB when:**
-- Data structure evolves frequently
-- Need horizontal scalability
-- Working with JSON/document data
-- Building microservices
-- Global distribution required
+### A Truly Open Alternative
 
-**Use SQL Server when:**
-- Complex relationships and joins
-- Strong ACID across tables
-- Mature SQL expertise
-- Reporting and analytics
-- Legacy application integration
+Azure DocumentDB is:
+- **Apache 2.0 licensed**
+- **Community-driven**
+- **Cloud-neutral**
+- **Vendor-agnostic**
+
+This matters for:
+- Governments
+- Regulated industries
+- Linux distributions
+- Companies building database platforms
+
+<!--
+Presenter Notes:
+- PostgreSQL has 30+ years of production hardening - this is not a new, unproven database
+- ACID transactions: guaranteed consistency, unlike eventual consistency models
+- Strong consistency: reads reflect all previous writes - critical for financial, healthcare, etc.
+- Durability guarantees: PostgreSQL's WAL (Write-Ahead Logging) is battle-tested
+- Indexing: B-tree, hash, GIN, GiST, BRIN - sophisticated index types for any workload
+- Operational tooling: pg_dump, pg_restore, replication, monitoring, backup tools - mature ecosystem
+- The proposition: don't choose between MongoDB's API and PostgreSQL's reliability - get both
+- Teams already know Postgres: DBAs, SREs, and ops teams have existing expertise
+- Existing infrastructure: leverage current PostgreSQL clusters, backups, monitoring
+- Cost savings: use existing Postgres licenses and infrastructure instead of new MongoDB clusters
+- Apache 2.0: truly open source, OSI-approved, no strings attached
+- Community-driven: not controlled by a single vendor with changing license terms
+- Cloud-neutral: works on Azure, AWS, GCP, on-prem - no lock-in
+- Platform builders: companies creating database-as-a-service can use DocumentDB without licensing concerns
+- Compliance-friendly: governments and regulated industries can adopt without legal reviews
+- Distribution-friendly: Linux distros can package and distribute without SSPL concerns
+-->
+
+---
+
+
+# **Why SQL Server / DBAs Should Care**
+
+## A Strategic Shift in Database Architecture
+
+From a SQL pro's perspective, DocumentDB represents a larger trend:
+
+- **The document model is here to stay**
+- **MongoDB's API has become a de facto standard**
+- **Teams want JSON + ACID + portability**
+- **PostgreSQL keeps absorbing new workloads**
+- **Compatibility layers are strategic architectural tools**
+
+---
+
+# **Why SQL Server / DBAs Should Care**
+
+## Part of a Broader Movement
+
+DocumentDB is part of the same movement as:
+
+- **Azure DocumentDB** - MongoDB API on PostgreSQL
+- **FerretDB** - Open source MongoDB compatibility
+- **PostgreSQL JSONB adoption** - Native JSON handling
+- **"API-first databases"** - Protocol compatibility over native implementation
+
+<!--
+Presenter Notes:
+- This isn't about replacing SQL Server - it's about expanding your toolkit
+- Document model addresses real pain points: schema evolution, JSON-native apps, horizontal scale
+- MongoDB API is ubiquitous: drivers, tools, developer familiarity - it's become a standard interface
+- Modern apps demand: flexible schemas (JSON), transactional integrity (ACID), no vendor lock-in (portability)
+- PostgreSQL evolution: from relational purist to multi-model powerhouse - JSONB, time-series, graph
+- Compatibility layers lesson: Don't rebuild from scratch - translate and adapt (see: TDS, MySQL protocol compatibility)
+- Career perspective: DBAs who understand both relational AND document models are more valuable
+- Technology perspective: This is convergence, not replacement - SQL + JSON in the same ecosystem
+- FerretDB and Azure DocumentDB prove: PostgreSQL foundation + MongoDB interface = powerful combination
+- Strategic insight: Future databases will be multi-model with multiple API surfaces
+- Action item for DBAs: Learn document modeling, understand JSONB, explore PostgreSQL extensions
+-->
 
 ---
 
