@@ -45,7 +45,8 @@ footer: '© 2026'
 
 ## What is Azure DocumentDB?
 
-- **Open Source** distributed document database (released 2025)
+- **Open Source** distributed document database (released 2025) 
+- ❌ 2017, ❌ AWS
 - **MongoDB-compatible API** running on **PostgreSQL**
 - Built for **cloud-native** applications
 - Designed for **horizontal scalability**
@@ -54,7 +55,7 @@ footer: '© 2026'
 
 <!--
 Presenter Notes:
-- Emphasize that this is a NEW open source project released in 2025
+- Emphasize that this is a NEW open source project released in 2025, not a legacy product from 2017 or an AWS service
 - Key differentiator: MongoDB API compatibility running on PostgreSQL foundation
 - This means familiar MongoDB syntax and tooling, but PostgreSQL reliability underneath
 - Highlight the "best of both worlds" approach
@@ -69,11 +70,11 @@ Presenter Notes:
 
 ## Why Document Databases?
 
-- ✅ **Flexible Schema** - evolve without downtime
-- ✅ **Natural data representation** - JSON documents
-- ✅ **Developer friendly** - maps to application objects
-- ✅ **Fast reads and writes** - optimized for documents
-- ✅ **Horizontal scalability** - grow with your data
+- **Flexible Schema** - evolve without downtime
+- **Natural data representation** - JSON documents
+- **Developer friendly** - maps to application objects
+- **Fast reads and writes** - optimized for documents
+- **Horizontal scalability** - grow with your data
 
 <!--
 Presenter Notes:
@@ -94,6 +95,7 @@ Presenter Notes:
 ## High-Level Design
 
 ```
+<img src="img/documentdb.gif" alt="Architecture" />
 ┌─────────────────────────────────────────────┐
 │         Application Layer                   │
 │  (REST API, SDKs: .NET, Java, Python, JS)   │
