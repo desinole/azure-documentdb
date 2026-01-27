@@ -94,9 +94,11 @@ Presenter Notes:
 
 ## High-Level Design
 
+![DocumentDB Architecture](img/documentdb.gif)
+
 ```
 
-![width:200px](img/documentdb.gif) <!-- Setting width to 200px -->
+
 ┌─────────────────────────────────────────────┐
 │         Application Layer                   │
 │  (REST API, SDKs: .NET, Java, Python, JS)   │
