@@ -19,13 +19,12 @@ footer: '© 2026'
 
 <!-- Add your information here -->
 
-- **Name:** [Santosh Hari]
-- **Role:** [Azure EngOps - Customer Engineer]
-- **Experience:** Specializes in designing and operating large-scale Azure data platforms and helping enterprises modernize applications with DocumentDB and other cloud-native services.
+- **Name:** Santosh Hari
+- **Role:** Azure EngOps
 - **Connect:** 
-  - 💼 LinkedIn: [santoshhari]
-  - 📧 Email: [your.email@domain.com]
-
+  - LinkedIn: santoshhari
+  - BlueSky: @santoshhari.dev
+  - GitHub: desinole
 ---
 
 # **Agenda**
@@ -53,6 +52,17 @@ footer: '© 2026'
 - **ACID transactions** at document and collection level
 - **Global distribution** capabilities
 
+<!--
+Presenter Notes:
+- Emphasize that this is a NEW open source project released in 2025
+- Key differentiator: MongoDB API compatibility running on PostgreSQL foundation
+- This means familiar MongoDB syntax and tooling, but PostgreSQL reliability underneath
+- Highlight the "best of both worlds" approach
+- Use case: Teams who want MongoDB-style development but need PostgreSQL enterprise features
+- Point out ACID guarantees - full transactional support unlike eventual consistency models
+- Global distribution through Azure's infrastructure - multi-region deployment made simple
+-->
+
 ---
 
 # **Introduction to Azure DocumentDB**
@@ -65,6 +75,18 @@ footer: '© 2026'
 - ✅ **Fast reads and writes** - optimized for documents
 - ✅ **Horizontal scalability** - grow with your data
 
+<!--
+Presenter Notes:
+- Schema flexibility: No need to run ALTER TABLE migrations; just add new fields
+- Example: Add a "preferences" object to user documents without touching existing records
+- JSON is native to modern apps - no ORM impedance mismatch
+- Direct mapping to JavaScript/Python/Java objects - what you code is what you store
+- Performance: Documents stored together, reducing JOIN operations
+- Scalability story: Add more nodes to scale out, not just scale up
+- Contrast with relational: No rigid table structures, foreign keys, or complex schema migrations
+- Real-world scenario: E-commerce product catalogs with varying attributes per category
+-->
+
 ---
 
 # **Architecture Overview**
@@ -73,8 +95,8 @@ footer: '© 2026'
 
 ```
 ┌─────────────────────────────────────────────┐
-│         Application Layer                    │
-│  (REST API, SDKs: .NET, Java, Python, JS)  │
+│         Application Layer                   │
+│  (REST API, SDKs: .NET, Java, Python, JS)   │
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
@@ -85,7 +107,7 @@ footer: '© 2026'
 ┌─────────────────▼───────────────────────────┐
 │         PostgreSQL Storage Engine           │
 │  (Partitioned, Replicated, Indexed)         │
-└──────────────────────────────────────────────┘
+└─────────────────────────────────────────────┘
 ```
 
 ---
