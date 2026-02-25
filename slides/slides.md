@@ -583,51 +583,24 @@ Presenter Notes:
 
 ## Learn More
 
-- 📚 **DocumentDB Docs:** [learn.microsoft.com/azure/cosmos-db/mongodb](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/vcore/)
+- 📚 **DocumentDB Docs:** [learn.microsoft.com/en-us/azure/documentdb/](https://learn.microsoft.com/en-us/azure/documentdb/)
 - 💻 **DocumentDB GitHub:** [github.com/microsoft/documentdb](https://github.com/microsoft/documentdb)
 - 🧠 **DiskANN GitHub:** [github.com/microsoft/DiskANN](https://github.com/microsoft/DiskANN)
 - 🔍 **Vector Search Docs:** [DocumentDB Vector Search](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/vcore/vector-search)
 - 🐳 **Docker Image:** [mcr.microsoft.com/documentdb/documentdb](https://mcr.microsoft.com/documentdb/documentdb)
-- 🎯 **Demo Code:** [src/ in this repo](../src/)
+- 🎯 **Demo Code:** [src/ in this repo](https://github.com/desinole/azure-documentdb/tree/main/src/)
 
 ---
 
-# **Q&A**
 
-## Questions?
+# **Speaker Introduction**
 
-**Thank you for attending!**
+<!-- Add your information here -->
 
-Let's discuss:
-- Your specific use cases
-- Migration strategies
-- Architecture patterns
-- Performance optimization
-- Best practices
-
+- **Name:** Santosh Hari
+- **Role:** Azure EngOps
+- **Connect:** 
+  - LinkedIn: santoshhari
+  - BlueSky: @santoshhari.dev
+  - GitHub: desinole
 ---
-
-# **Contact & Follow-Up**
-
-## Stay Connected
-
-- 📧 **Email:** [your.email@domain.com]
-- 🐦 **Twitter:** [@yourusername]
-- 💼 **LinkedIn:** [Your Profile]
-- 💻 **GitHub:** [This Repository]
-- 📝 **Blog:** [Your Blog URL]
-
-### Resources from this talk:
-- Slides: Available in this repository
-- Code samples: [/code-samples](../code-samples/)
-- Demo scripts: Coming soon
-
----
-
-<!-- Last slide -->
-# Thank You! 🙏
-
-### Start building with Azure DocumentDB today!
-
-**Remember:** The best database is the one that fits your use case.
-
