@@ -149,74 +149,6 @@ Presenter Notes:
 
 ---
 
-
-# **Demo Time! 🚀**
-
-## Basic CRUD Operations & Schema Flexibility
-
-Let's see Azure DocumentDB in action:
-
-1. **Create** a database and collection
-2. **Insert** documents with different schemas
-3. **Read** documents with queries
-4. **Update** documents
-5. **Delete** documents
-
----
-
-# **Demo: Basic CRUD**
-
-## Sample Documents (Different Schemas!)
-
-```json
-// User Document
-{
-  "id": "user-001",
-  "type": "user",
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "joinDate": "2026-01-15"
-}
-
-// Product Document
-{
-  "id": "prod-001", 
-  "type": "product",
-  "name": "Laptop",
-  "price": 1299.99,
-  "specs": { "cpu": "Intel i7", "ram": "16GB" }
-}
-```
-
-**Same collection, different structures!** ✨
-
----
-
-# **Demo: Schema Flexibility**
-
-## Evolution Without Downtime
-
-```json
-// Version 1 - Original User
-{
-  "id": "user-002",
-  "name": "John Smith",
-  "email": "john@example.com"
-}
-
-// Version 2 - Extended User (no migration needed!)
-{
-  "id": "user-003",
-  "name": "Alice Johnson",
-  "email": "alice@example.com",
-  "phone": "+1-555-0123",
-  "address": {
-    "city": "Seattle",
-    "country": "USA"
-  }
-}
-```
-
 # **Why Azure DocumentDB Exists**
 
 ## The Core Problems It Solves
@@ -285,25 +217,48 @@ PostgreSQL already provides:
 **Azure DocumentDB = MongoDB ergonomics + PostgreSQL reliability**
 
 ---
-
+<style>
+  .columns {
+    display: flex;
+    height: 80%; /* Adjust height as needed */
+    justify-content: space-evenly;
+    align-items: center;
+  }
+  .column {
+    flex: 1;
+    padding: 0 20px; /* Add some spacing */
+  }
+</style>
 # **Why Azure DocumentDB Exists**
 
 ## The Core Problems It Solves
 
 ### A Truly Open Alternative
 
-Azure DocumentDB is:
-- **Apache 2.0 licensed**
-- **Community-driven**
-- **Cloud-neutral**
-- **Vendor-agnostic**
+<div class="columns">
+  <div class="column">
+    Azure DocumentDB is:
 
-This matters for:
-- Governments
-- Regulated industries
-- Linux distributions
-- Companies building database platforms
+    - Apache 2.0 licensed
+    
+    - Community-driven
+    
+    - Cloud-neutral
+    
+    - Vendor-agnostic
+  </div>
+  <div class="column">
+    This matters for:
 
+    - Governments
+    
+    - Regulated industries
+    
+    - Linux distributions
+    
+    - Companies building database platforms
+  </div>
+</div>
 <!--
 Presenter Notes:
 - PostgreSQL has 30+ years of production hardening - this is not a new, unproven database
@@ -369,15 +324,271 @@ Presenter Notes:
 
 ---
 
+# **Demo 1: Setting Up DocumentDB Locally 🐳**
+
+## Running DocumentDB in a Container
+
+```bash
+# Pull the DocumentDB container image
+docker pull mcr.microsoft.com/documentdb/documentdb:latest
+
+# Run DocumentDB locally
+docker run -dt --name documentdb \
+  -p 10260:10260 -p 5432:5432 \
+  -e DOCUMENTDB_ADMIN_USER=admin \
+  -e DOCUMENTDB_ADMIN_PASSWORD=YourPassword123! \
+  mcr.microsoft.com/documentdb/documentdb:latest
+```
+
+- Port **10260**: MongoDB-compatible gateway
+- Port **5432**: PostgreSQL backend
+- Ready in seconds!
+
+<!--
+Presenter Notes:
+- Show the Docker pull and run commands live
+- Highlight the two exposed ports: 10260 for MongoDB wire protocol, 5432 for PostgreSQL
+- Emphasize how quick and easy local setup is — no complex installation
+- Mention that the same container image works on any Docker-compatible environment
+-->
+
+---
+
+# **Demo 2: .NET Client App 🟣**
+
+## Creating Database, Collection & Inserting Data
+
+```csharp
+using MongoDB.Driver;
+using MongoDB.Bson;
+
+// Connect to DocumentDB gateway
+var client = new MongoClient("mongodb://admin:YourPassword123!@localhost:10260");
+
+// Create database and collection
+var db = client.GetDatabase("demo_db");
+var collection = db.GetCollection<BsonDocument>("products");
+
+// Insert documents
+collection.InsertMany(new[] {
+    new BsonDocument { {"name","Laptop"}, {"price",1299.99}, {"category","electronics"} },
+    new BsonDocument { {"name","Headphones"}, {"price",79.99}, {"category","electronics"} },
+    new BsonDocument { {"name","Notebook"}, {"price",4.99}, {"category","office"} }
+});
+```
+
+**Standard MongoDB.Driver NuGet — zero DocumentDB-specific code!** ✨
+
+<!--
+Presenter Notes:
+- Show the .NET console app running live against the local container
+- Emphasize that this is the standard MongoDB.Driver NuGet package — the same code works against MongoDB
+- No special SDK or driver needed — existing MongoDB drivers just work
+- Database and collection are created implicitly on first insert
+- Point out the connection string uses the gateway port (10260)
+-->
+
+---
+
+# **Demo 3: Two Query Interfaces 🔍**
+
+## MongoDB Queries (via Gateway, port 10260)
+
+```javascript
+// Find electronics over $100
+db.products.find({ category: "electronics", price: { $gt: 100 } })
+
+// Aggregation pipeline
+db.products.aggregate([
+  { $group: { _id: "$category", avgPrice: { $avg: "$price" } } }
+])
+```
+
+## PostgreSQL Queries (via Backend, port 5432)
+
+```sql
+-- Same data, queried with SQL
+SELECT document FROM documentdb_api.collection('demo_db', 'products')
+WHERE document @> '{"category": "electronics"}';
+```
+
+**Same data, two query languages!** ✨
+
+<!--
+Presenter Notes:
+- First, show mongosh connecting to port 10260 and running familiar MongoDB queries
+- Then, show psql connecting to port 5432 and querying the same data with SQL
+- Key takeaway: the data is stored once but accessible through both interfaces
+- MongoDB queries go through the gateway which translates to PostgreSQL operations
+- PostgreSQL queries hit the backend directly — useful for DBAs and reporting
+- This dual-interface approach gives teams flexibility: app developers use MongoDB, DBAs use SQL
+-->
+
+---
+
+# **Vector Search with DiskANN 🧠**
+
+## What is DiskANN?
+
+- **Disk-based Approximate Nearest Neighbor** search algorithm
+- Developed by **Microsoft Research**
+- Graph-structured index for **scalable vector search**
+- Handles **billions of vectors** without requiring all data in memory
+- Published at NeurIPS 2019, open-sourced on GitHub
+
+### Key Innovation
+
+Traditional vector indexes (HNSW, IVF) require data in RAM.
+**DiskANN stores the index on SSD** — enabling massive scale at lower cost.
+
+<!--
+Presenter Notes:
+- DiskANN stands for Disk-based Approximate Nearest Neighbor
+- Born from Microsoft Research, now powers vector search across Azure services
+- The core innovation: a graph-based index that works efficiently from SSD storage
+- Traditional approaches like HNSW keep everything in memory — expensive at scale
+- DiskANN achieves comparable recall and latency while using a fraction of the memory
+- Published at NeurIPS 2019 — one of the top ML/AI conferences
+- Open source on GitHub: github.com/microsoft/DiskANN
+- Now rewritten in Rust for performance and safety
+-->
+
+---
+
+# **Vector Search with DiskANN 🧠**
+
+## DiskANN vs Competitors
+
+| Feature | **DiskANN** | **HNSW** | **IVF** |
+|---------|------------|----------|---------|
+| **Scale** | 500K+ vectors | Up to 50K | Under 10K |
+| **Memory** | Low (SSD-based) | High (in-memory) | Medium |
+| **Recall** | High | High | Moderate |
+| **Build Time** | Moderate | Slow | Fast |
+| **Filtering** | ✅ Native | ✅ Post-filter | ❌ Limited |
+
+### Other Competitors in the Market
+
+- **Pinecone** — managed vector DB, proprietary, no self-host
+- **Weaviate** — open source, HNSW-based, separate infrastructure
+- **Qdrant** — Rust-based, open source, standalone service
+- **Milvus/Zilliz** — open source, multiple index types, complex setup
+- **pgvector** — PostgreSQL extension, HNSW/IVF only, no DiskANN
+
+<!--
+Presenter Notes:
+- DiskANN is the recommended index type for DocumentDB — it works best at any scale
+- HNSW is great for smaller datasets but memory-hungry at scale
+- IVF is fastest to build but has the worst recall/speed tradeoff
+- Pinecone: fully managed but proprietary, no self-hosting, vendor lock-in
+- Weaviate: good open source option but requires separate infrastructure — another service to manage
+- Qdrant: performant Rust-based engine, but standalone — not integrated with your document data
+- Milvus: powerful but complex distributed system, steep operational learning curve
+- pgvector: closest competitor, but lacks DiskANN's scale — limited to HNSW and IVF
+- Key advantage of DocumentDB: DiskANN is INTEGRATED — vectors live alongside your documents
+- No data duplication, no sync pipelines, no extra infrastructure
+-->
+
+---
+
+# **Vector Search with DiskANN 🧠**
+
+## Why DiskANN in DocumentDB?
+
+### Integrated Vector Search — Not a Bolt-On
+
+- Vectors stored **alongside your documents** — no separate vector DB
+- **No data sync pipelines** to build and maintain
+- Query vectors and documents in the **same query**
+- Native support for **filtered vector search** (geo, text, numeric)
+- Supports up to **16,000 dimensions** with product quantization
+
+### Use Cases
+
+- 🔍 **Semantic search** over product catalogs
+- 🤖 **RAG** (Retrieval-Augmented Generation) for AI apps
+- 🎯 **Recommendation engines** with contextual filtering
+- 📍 **Location-aware similarity** (vector + geospatial)
+
+<!--
+Presenter Notes:
+- The killer feature: vectors and documents in ONE database — no separate Pinecone/Weaviate/Qdrant
+- Data consistency: when you update a document, the vector index updates too
+- No ETL pipelines: no need to sync data between your app DB and a vector DB
+- Filtered search: combine vector similarity with geo, text, or numeric filters in one query
+- Example: "Find similar products within 50 miles that are in stock"
+- 16K dimensions supports modern embedding models (OpenAI, Cohere, etc.)
+- RAG pattern: store documents + embeddings together, retrieve context for LLM prompts
+- This is the convergence story: your operational DB IS your vector DB
+-->
+
+---
+
+# **Demo 4: Vector Search with DiskANN 🔍**
+
+## .NET Vector Index Example
+
+```csharp
+// Create a DiskANN vector index
+var createIndex = new BsonDocument("createIndexes", "products");
+createIndex.Add("indexes", new BsonArray {
+    new BsonDocument {
+        { "name", "vectorIndex" },
+        { "key", new BsonDocument("embedding", "cosmosSearch") },
+        { "cosmosSearchOptions", new BsonDocument {
+            { "kind", "vector-diskann" },
+            { "dimensions", 3 },
+            { "similarity", "COS" }
+        }}
+    }
+});
+db.RunCommand<BsonDocument>(createIndex);
+```
+
+<!--
+Presenter Notes:
+- Show creating a DiskANN index — just a few lines of configuration
+- kind: "vector-diskann" is the key parameter
+- dimensions must match your embedding model output size
+- Similarity options: COS (cosine), L2 (Euclidean), IP (inner product)
+-->
+
+---
+# **Demo 4: Vector Search with DiskANN 🔍**
+
+## .NET Vector Search Example
+
+```csharp
+// Vector similarity search
+var pipeline = new[] {
+    new BsonDocument("$search", new BsonDocument("cosmosSearch",
+        new BsonDocument {
+            { "path", "embedding" },
+            { "vector", new BsonArray { 0.52, 0.28, 0.12 } },
+            { "k", 3 }
+        }))
+};
+```
+
+<!--
+Presenter Notes:
+- The $search aggregation stage performs the vector search
+- k parameter controls how many nearest neighbors to return
+- Run the .NET demo app to see results with similarity scores
+-->
+
+---
+
 # **Resources**
 
 ## Learn More
 
-- 📚 **Documentation:** [docs.microsoft.com/azure/documentdb](https://docs.microsoft.com/azure/documentdb)
-- 💻 **GitHub:** [github.com/Azure/azure-documentdb](https://github.com/Azure/azure-documentdb)
-- 🎓 **Learn Path:** Microsoft Learn modules
-- 👥 **Community:** Stack Overflow, GitHub Discussions
-- 🎯 **Samples:** [Code samples in this repo](../code-samples/)
+- 📚 **DocumentDB Docs:** [learn.microsoft.com/azure/cosmos-db/mongodb](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/vcore/)
+- 💻 **DocumentDB GitHub:** [github.com/microsoft/documentdb](https://github.com/microsoft/documentdb)
+- 🧠 **DiskANN GitHub:** [github.com/microsoft/DiskANN](https://github.com/microsoft/DiskANN)
+- 🔍 **Vector Search Docs:** [DocumentDB Vector Search](https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/vcore/vector-search)
+- 🐳 **Docker Image:** [mcr.microsoft.com/documentdb/documentdb](https://mcr.microsoft.com/documentdb/documentdb)
+- 🎯 **Demo Code:** [src/ in this repo](../src/)
 
 ---
 

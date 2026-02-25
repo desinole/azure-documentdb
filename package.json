@@ -1,0 +1,13 @@
+{
+  "name": "azure-documentdb",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Azure DocumentDB - Open Source Distributed Database slides and samples",
+  "scripts": {
+    "slides": "marp --server --server-port 8081 slides/",
+    "slides:build": "marp slides/slides.md -o slides/slides.html"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "^4"
+  }
+}

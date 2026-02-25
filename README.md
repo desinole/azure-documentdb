@@ -26,7 +26,25 @@ Azure DocumentDB is an open source distributed database project that provides sc
 
 ## Getting Started
 
-Refer to the README files in each subfolder for specific instructions and details.
+### Running the Slides Locally
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the local slide server:
+   ```bash
+   npm run slides
+   ```
+   This launches a Marp dev server at [http://localhost:8081](http://localhost:8081) with live reload.
+
+3. (Optional) Export slides to a static HTML file:
+   ```bash
+   npm run slides:build
+   ```
+
+Refer to the README files in each subfolder for additional instructions and details.
 
 ## License
 
