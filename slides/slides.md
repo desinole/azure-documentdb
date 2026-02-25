@@ -462,14 +462,11 @@ Presenter Notes:
 | Feature | **DocumentDB** | **Pinecone** | **Weaviate** | **Qdrant** | **Milvus** | **pgvector** |
 |---------|---------------|-------------|-------------|-----------|-----------|-------------|
 | **Index** | DiskANN | Proprietary | HNSW | HNSW | Multiple | HNSW/IVF |
-| **Open Source** | ✅ Apache 2.0 | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Self-Host** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Scale** | 500K+ vectors | Large | Medium | Medium | Large | Small |
 | **Memory** | Low (SSD) | Managed | High | High | High | High |
 | **Filtered Search** | ✅ Native | ✅ | ✅ | ✅ | ✅ | ❌ Limited |
-| **Document DB** | ✅ Built-in | ❌ | ✅ | ❌ | ❌ | ❌ |
-| **MongoDB API** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **SQL Access** | ✅ PostgreSQL | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Integration** | DocumentDB | Vector-only | Vector-only | Vector-only | Vector-only | PostgreSQL extension |
 
 <!--
 Presenter Notes:
