@@ -329,15 +329,15 @@ Presenter Notes:
 ## Running DocumentDB in a Container
 
 ```bash
-# Pull the DocumentDB container image
-docker pull mcr.microsoft.com/documentdb/documentdb:latest
 
-# Run DocumentDB locally
-docker run -dt --name documentdb \
-  -p 10260:10260 -p 5432:5432 \
-  -e DOCUMENTDB_ADMIN_USER=admin \
-  -e DOCUMENTDB_ADMIN_PASSWORD=YourPassword123! \
-  mcr.microsoft.com/documentdb/documentdb:latest
+   # Pull the latest DocumentDB Docker image
+   docker pull ghcr.io/documentdb/documentdb/documentdb-local:latest
+
+   # Tag the image for convenience
+   docker tag ghcr.io/documentdb/documentdb/documentdb-local:latest documentdb
+
+   # Run the container with your chosen username and password
+   docker run -dt -p 10260:10260 --name documentdb-container documentdb --username <YOUR_USERNAME> --password <YOUR_PASSWORD>
 ```
 
 - Port **10260**: MongoDB-compatible gateway
@@ -481,7 +481,7 @@ Presenter Notes:
 
 ---
 
-# **Vector Search with DiskANN 🧠**
+# **Vector Search with DiskANN **
 
 ## Why DiskANN in DocumentDB?
 
@@ -493,6 +493,18 @@ Presenter Notes:
 - Native support for **filtered vector search** (geo, text, numeric)
 - Supports up to **16,000 dimensions** with product quantization
 
+<!--
+Presenter Notes:
+- The killer feature: vectors and documents in ONE database — no separate Pinecone/Weaviate/Qdrant
+- Data consistency: when you update a document, the vector index updates too
+- No ETL pipelines: no need to sync data between your app DB and a vector DB
+- Filtered search: combine vector similarity with geo, text, or numeric filters in one query
+-->
+
+---
+
+# **Vector Search with DiskANN **
+
 ### Use Cases
 
 - 🔍 **Semantic search** over product catalogs
@@ -502,10 +514,6 @@ Presenter Notes:
 
 <!--
 Presenter Notes:
-- The killer feature: vectors and documents in ONE database — no separate Pinecone/Weaviate/Qdrant
-- Data consistency: when you update a document, the vector index updates too
-- No ETL pipelines: no need to sync data between your app DB and a vector DB
-- Filtered search: combine vector similarity with geo, text, or numeric filters in one query
 - Example: "Find similar products within 50 miles that are in stock"
 - 16K dimensions supports modern embedding models (OpenAI, Cohere, etc.)
 - RAG pattern: store documents + embeddings together, retrieve context for LLM prompts
