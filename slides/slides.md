@@ -329,7 +329,6 @@ Presenter Notes:
 ## Running DocumentDB in a Container
 
 ```bash
-
    # Pull the latest DocumentDB Docker image
    docker pull ghcr.io/documentdb/documentdb/documentdb-local:latest
 
@@ -337,7 +336,7 @@ Presenter Notes:
    docker tag ghcr.io/documentdb/documentdb/documentdb-local:latest documentdb
 
    # Run the container with your chosen username and password
-   docker run -dt -p 10260:10260 --name documentdb-container documentdb --username <YOUR_USERNAME> --password <YOUR_PASSWORD>
+   docker run -dt -p 10260:10260 -p 5432:5432 --name documentdb-container documentdb --username admin --password DocDBPass123!
 ```
 
 - Port **10260**: MongoDB-compatible gateway
