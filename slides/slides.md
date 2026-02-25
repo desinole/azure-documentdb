@@ -457,36 +457,31 @@ Presenter Notes:
 
 # **Vector Search with DiskANN 🧠**
 
-## DiskANN vs Competitors
+## Azure DocumentDB vs Competitors
 
-| Feature | **DiskANN** | **HNSW** | **IVF** |
-|---------|------------|----------|---------|
-| **Scale** | 500K+ vectors | Up to 50K | Under 10K |
-| **Memory** | Low (SSD-based) | High (in-memory) | Medium |
-| **Recall** | High | High | Moderate |
-| **Build Time** | Moderate | Slow | Fast |
-| **Filtering** | ✅ Native | ✅ Post-filter | ❌ Limited |
-
-### Other Competitors in the Market
-
-- **Pinecone** — managed vector DB, proprietary, no self-host
-- **Weaviate** — open source, HNSW-based, separate infrastructure
-- **Qdrant** — Rust-based, open source, standalone service
-- **Milvus/Zilliz** — open source, multiple index types, complex setup
-- **pgvector** — PostgreSQL extension, HNSW/IVF only, no DiskANN
+| Feature | **DocumentDB** | **Pinecone** | **Weaviate** | **Qdrant** | **Milvus** | **pgvector** |
+|---------|---------------|-------------|-------------|-----------|-----------|-------------|
+| **Index** | DiskANN | Proprietary | HNSW | HNSW | Multiple | HNSW/IVF |
+| **Open Source** | ✅ Apache 2.0 | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Self-Host** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Scale** | 500K+ vectors | Large | Medium | Medium | Large | Small |
+| **Memory** | Low (SSD) | Managed | High | High | High | High |
+| **Filtered Search** | ✅ Native | ✅ | ✅ | ✅ | ✅ | ❌ Limited |
+| **Document DB** | ✅ Built-in | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **MongoDB API** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **SQL Access** | ✅ PostgreSQL | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 <!--
 Presenter Notes:
-- DiskANN is the recommended index type for DocumentDB — it works best at any scale
-- HNSW is great for smaller datasets but memory-hungry at scale
-- IVF is fastest to build but has the worst recall/speed tradeoff
-- Pinecone: fully managed but proprietary, no self-hosting, vendor lock-in
+- DocumentDB's key differentiator: DiskANN index + integrated document database + MongoDB API
+- Pinecone: fully managed but proprietary, no self-hosting, vendor lock-in, vectors only
 - Weaviate: good open source option but requires separate infrastructure — another service to manage
 - Qdrant: performant Rust-based engine, but standalone — not integrated with your document data
 - Milvus: powerful but complex distributed system, steep operational learning curve
-- pgvector: closest competitor, but lacks DiskANN's scale — limited to HNSW and IVF
-- Key advantage of DocumentDB: DiskANN is INTEGRATED — vectors live alongside your documents
+- pgvector: closest competitor on PostgreSQL, but lacks DiskANN's scale — limited to HNSW and IVF
+- Only DocumentDB gives you: document store + vector search + MongoDB API + SQL access in one system
 - No data duplication, no sync pipelines, no extra infrastructure
+- DiskANN's SSD-based design means you don't need expensive high-memory instances
 -->
 
 ---
@@ -592,10 +587,7 @@ Presenter Notes:
 
 ---
 
-
-# **Speaker Introduction**
-
-<!-- Add your information here -->
+# **Thank You! 🙏**
 
 - **Name:** Santosh Hari
 - **Role:** Azure EngOps
