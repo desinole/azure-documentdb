@@ -455,9 +455,7 @@ Presenter Notes:
 
 ---
 
-# **Vector Search with DiskANN 🧠**
-
-## Azure DocumentDB vs Competitors
+# **Azure DocumentDB vs Competitors**
 
 | Feature | **DocumentDB** | **Pinecone** | **Weaviate** | **Qdrant** | **Milvus** | **pgvector** |
 |---------|---------------|-------------|-------------|-----------|-----------|-------------|
@@ -466,7 +464,7 @@ Presenter Notes:
 | **Scale** | 500K+ vectors | Large | Medium | Medium | Large | Small |
 | **Memory** | Low (SSD) | Managed | High | High | High | High |
 | **Filtered Search** | ✅ Native | ✅ | ✅ | ✅ | ✅ | ❌ Limited |
-| **Integration** | DocumentDB | Vector-only | Vector-only | Vector-only | Vector-only | PostgreSQL extension |
+| **DB Integration** | DocumentDB | Vector-only | Vector-only | Vector-only | Vector-only | PostgreSQL extension |
 
 <!--
 Presenter Notes:
