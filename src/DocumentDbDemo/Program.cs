@@ -1,27 +1,41 @@
-﻿using MongoDB.Bson;
+﻿using System.Net.Security;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 // Connect to DocumentDB gateway
-var client = new MongoClient("mongodb://admin:YourPassword123!@localhost:10260");
+var settings = MongoClientSettings.FromConnectionString("");
+settings.SslSettings = new SslSettings
+{
+    ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true
+};
+var client = new MongoClient(settings);
 
 // Create database and collection
-var db = client.GetDatabase("demo_db");
+var db = client.GetDatabase("sampledb");
 var collection = db.GetCollection<BsonDocument>("products");
 
 // Insert documents
 var products = new[]
 {
-    new BsonDocument { { "name", "Laptop" }, { "price", 1299.99 }, { "category", "electronics" } },
-    new BsonDocument { { "name", "Headphones" }, { "price", 79.99 }, { "category", "electronics" } },
-    new BsonDocument { { "name", "Notebook" }, { "price", 4.99 }, { "category", "office" } }
+    new BsonDocument { { "_id", "prod-001" }, { "name", "Laptop" }, { "price", 1299.99 }, { "category", "electronics" } },
+    new BsonDocument { { "_id", "prod-002" }, { "name", "Headphones" }, { "price", 79.99 }, { "category", "electronics" } },
+    new BsonDocument { { "_id", "prod-003" }, { "name", "Notebook" }, { "price", 4.99 }, { "category", "office" } }
 };
 
-collection.InsertMany(products);
-Console.WriteLine($"Inserted {products.Length} documents into demo_db.products");
+try
+{
+    collection.InsertMany(products, new InsertManyOptions { IsOrdered = false });
+    Console.WriteLine($"Inserted {products.Length} documents into sampledb.products");
+}
+catch (MongoBulkWriteException e) when (e.WriteErrors.All(err => err.Category == ServerErrorCategory.DuplicateKey))
+{
+    var inserted = products.Length - e.WriteErrors.Count;
+    Console.WriteLine($"Inserted {inserted} new documents (skipped {e.WriteErrors.Count} duplicates)");
+}
 
 // Query: find electronics over $100
 var filter = Builders<BsonDocument>.Filter.And(
-    Builders<BsonDocument>.Filter.Eq("category", "electronics"),
+    Builders<BsonDocument>.Filter.Regex("category", new BsonRegularExpression("^electronics$", "i")),
     Builders<BsonDocument>.Filter.Gt("price", 100)
 );
 
@@ -37,7 +51,7 @@ var pipeline = new[]
 {
     new BsonDocument("$group", new BsonDocument
     {
-        { "_id", "$category" },
+        { "_id", new BsonDocument("$toLower", "$category") },
         { "avgPrice", new BsonDocument("$avg", "$price") }
     })
 };

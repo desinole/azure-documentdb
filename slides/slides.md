@@ -389,38 +389,98 @@ Presenter Notes:
 
 ---
 
-# **Demo 3: Two Query Interfaces 🔍**
+# **Demo 3a: MongoDB Queries via mongosh 🔍**
 
-## MongoDB Queries (via Gateway, port 10260)
+## Connect to the Gateway
+
+```bash
+mongosh "mongodb://admin:DocDBPass123!@localhost:10260/?tls=true&tlsAllowInvalidCertificates=true"
+```
+
+## Run Queries
 
 ```javascript
+use sampledb
+
 // Find electronics over $100
 db.products.find({ category: "electronics", price: { $gt: 100 } })
 
 // Aggregation pipeline
 db.products.aggregate([
-  { $group: { _id: "$category", avgPrice: { $avg: "$price" } } }
+  { $group: { _id: { $toLower: "$category" }, avgPrice: { $avg: "$price" } } }
 ])
 ```
 
-## PostgreSQL Queries (via Backend, port 5432)
-
-```sql
--- Same data, queried with SQL
-SELECT document FROM documentdb_api.collection('demo_db', 'products')
-WHERE document @> '{"category": "electronics"}';
-```
-
-**Same data, two query languages!** ✨
+**Standard MongoDB shell — no special syntax!** ✨
 
 <!--
 Presenter Notes:
-- First, show mongosh connecting to port 10260 and running familiar MongoDB queries
-- Then, show psql connecting to port 5432 and querying the same data with SQL
+- Show mongosh connecting to port 10260 — the MongoDB-compatible gateway
+- The connection string uses TLS with tlsAllowInvalidCertificates for the self-signed cert
+- Run familiar MongoDB queries — find, aggregate, etc.
+- Emphasize: this is the same mongosh you'd use with any MongoDB instance
+- The gateway translates these commands to PostgreSQL operations behind the scenes
+-->
+
+---
+
+# **Demo 3b: PostgreSQL Queries via psql 🔍**
+
+## Connect to the Backend
+
+```bash
+docker exec -it documentdb-container psql -U admin -d postgres -p 9712
+```
+
+## Run Queries
+
+```sql
+-- Same data, queried with SQL
+SELECT document FROM documentdb_api.collection('sampledb', 'products')
+WHERE document @? '{"category": {"$regex": "electronics", "$options": "i"}}';
+```
+
+**Same data, different query language!** ✨
+
+<!--
+Presenter Notes:
+- Show psql connecting to port 9712 - the PostgreSQL backend
+- Use docker exec to connect directly inside the container
+- The same documents inserted via MongoDB API are queryable with SQL
 - Key takeaway: the data is stored once but accessible through both interfaces
 - MongoDB queries go through the gateway which translates to PostgreSQL operations
 - PostgreSQL queries hit the backend directly — useful for DBAs and reporting
 - This dual-interface approach gives teams flexibility: app developers use MongoDB, DBAs use SQL
+-->
+
+---
+
+# **Vector Index Algorithms 101 📐**
+
+## How Do You Search Millions of Vectors Quickly?
+
+Finding the **exact** nearest vector in millions of records is too slow. These algorithms trade a tiny bit of accuracy for massive speed gains — called **Approximate Nearest Neighbor (ANN)** search.
+
+### **IVF** — Inverted File Index
+Divides vectors into **clusters** (like zip codes). At query time, only searches the closest clusters instead of everything. Fast to build, but accuracy depends on hitting the right cluster.
+
+### **HNSW** — Hierarchical Navigable Small World
+Builds a **multi-layer graph** of connections between vectors (think express lanes on a highway). Top layers have long-distance links for fast traversal; bottom layers have fine-grained links for precision. High accuracy, but keeps **everything in memory**.
+
+### **DiskANN** — Disk-based ANN *(Microsoft Research)*
+Similar graph approach to HNSW, but engineered to work from **SSD storage** instead of RAM. Achieves comparable accuracy at a **fraction of the memory cost** — enabling billion-scale vector search.
+
+<!--
+Presenter Notes:
+- Start with WHY: brute-force search is O(n) — checking every vector is impractical at scale
+- ANN algorithms give you 95-99% accuracy at 100-1000x the speed
+- IVF analogy: imagine sorting mail by zip code, then only checking the relevant zip codes
+- IVF weakness: if your query is near a cluster boundary, you might miss nearby vectors in adjacent clusters
+- HNSW analogy: like an airport hub system — fly to a hub (top layer), then to regional (mid layer), then to local (bottom layer)
+- HNSW strength: excellent recall and speed. Weakness: entire index must fit in RAM
+- DiskANN innovation: Microsoft Research figured out how to build a similar graph that pages efficiently from SSD
+- DiskANN means you can index 1 billion vectors on a machine with 64GB RAM instead of needing 1TB+
+- This is why DocumentDB chose DiskANN — it scales to real-world datasets without breaking the bank
 -->
 
 ---
@@ -433,7 +493,7 @@ Presenter Notes:
 - Developed by **Microsoft Research**
 - Graph-structured index for **scalable vector search**
 - Handles **billions of vectors** without requiring all data in memory
-- Published at NeurIPS 2019, open-sourced on GitHub
+- Open source: [github.com/microsoft/DiskANN](https://github.com/microsoft/DiskANN)
 
 ### Key Innovation
 
@@ -447,7 +507,7 @@ Presenter Notes:
 - The core innovation: a graph-based index that works efficiently from SSD storage
 - Traditional approaches like HNSW keep everything in memory — expensive at scale
 - DiskANN achieves comparable recall and latency while using a fraction of the memory
-- Published at NeurIPS 2019 — one of the top ML/AI conferences
+- Published at NeurIPS 2019 - one of the top ML/AI conferences
 - Open source on GitHub: github.com/microsoft/DiskANN
 - Now rewritten in Rust for performance and safety
 -->
