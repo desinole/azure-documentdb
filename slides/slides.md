@@ -162,7 +162,23 @@ In 2018, MongoDB changed from AGPL to SSPL:
 - Unacceptable for enterprises, governments, Linux distributions
 - Creates legal/compliance risk for vendors and cloud providers
 
+Teams built large applications around MongoDB's:
+- Query language
+- Drivers  
+- Data model
+
+
 **Result:** Organizations want MongoDB's API—not its licensing terms.
+
+<!--
+Presenter Notes:
+- MongoDB's 2018 license change (AGPL to SSPL) created major issues for enterprises
+- SSPL is not recognized as "open source" by OSI - this matters for procurement and compliance
+- Many governments and regulated industries cannot use SSPL-licensed software
+- Linux distributions (Red Hat, Debian, Ubuntu) removed MongoDB from their repos
+- Legal departments flag SSPL as high-risk for SaaS companies
+- The core insight: teams love MongoDB's developer experience but want freedom from MongoDB Inc.
+-->
 
 ---
 
@@ -171,11 +187,6 @@ In 2018, MongoDB changed from AGPL to SSPL:
 ## The Core Problems It Solves
 
 ### Avoiding Vendor Lock-In
-
-Teams built large applications around MongoDB's:
-- Query language
-- Drivers  
-- Data model
 
 **Rewriting is expensive and risky.**
 
@@ -188,12 +199,6 @@ Azure DocumentDB offers:
 
 <!--
 Presenter Notes:
-- MongoDB's 2018 license change (AGPL to SSPL) created major issues for enterprises
-- SSPL is not recognized as "open source" by OSI - this matters for procurement and compliance
-- Many governments and regulated industries cannot use SSPL-licensed software
-- Linux distributions (Red Hat, Debian, Ubuntu) removed MongoDB from their repos
-- Legal departments flag SSPL as high-risk for SaaS companies
-- The core insight: teams love MongoDB's developer experience but want freedom from MongoDB Inc.
 - Vendor lock-in is real: once you've built on MongoDB, switching databases means rewriting everything
 - Migration risk: rewriting queries, retesting, potential data loss, business disruption
 - Azure DocumentDB decouples the API from the product - you get MongoDB compatibility without MongoDB
