@@ -11,7 +11,7 @@ footer: '© 2026'
 # **Azure DocumentDB**
 ## The New Open Source Distributed Database
 
-### Powering Modern Applications with Scale and Performance
+### Santosh Hari
 
 ---
 
@@ -31,10 +31,12 @@ footer: '© 2026'
 
 1. 📌 Introduction to Azure DocumentDB
 2. 🏗️ Architecture Overview
-3. ⚡ Key Features
-4. 🔄 Differentiation: DocumentDB vs MongoDB
-5. 🆚 Differentiation: DocumentDB vs SQL Server
-6. 🎯 Why DocumentDB? Why Now?
+3. 🎯 Why DocumentDB? Why Now?
+4. 🆚 Why SQL Server / DBAs Should Care
+5. 🐳 **Demo:** Local Setup, CRUD, Querying
+6. 📐 Vector Index Algorithms (IVF, HNSW, DiskANN)
+7. 🧠 Vector Search & Competitor Comparison
+8. 🔍 **Demo:** Vector Search with DiskANN
 
 ---
 
