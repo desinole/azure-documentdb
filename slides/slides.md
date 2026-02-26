@@ -162,11 +162,7 @@ In 2018, MongoDB changed from AGPL to SSPL:
 - Unacceptable for enterprises, governments, Linux distributions
 - Creates legal/compliance risk for vendors and cloud providers
 
-Teams built large applications around MongoDB's:
-- Query language
-- Drivers  
-- Data model
-
+Teams built large applications around MongoDB's Query language, Drivers and Data model
 
 **Result:** Organizations want MongoDB's API—not its licensing terms.
 
