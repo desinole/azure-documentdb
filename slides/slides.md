@@ -9,7 +9,7 @@ footer: '© 2026'
 ---
 
 # **Azure DocumentDB**
-## The New Open Source Distributed Database
+## Azure DocumentDB is back: Open Source and AI-ready
 
 ### Santosh Hari
 
