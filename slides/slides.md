@@ -13,6 +13,13 @@ footer: '© 2026'
 
 ### Santosh Hari
 
+<!--
+Presenter Notes:
+- Welcome the audience and introduce yourself briefly
+- Set context: this talk covers what Azure DocumentDB is, why it exists, and how to get started
+- Mention that there will be live demos — encourage questions throughout
+-->
+
 ---
 
 # **Speaker Introduction**
@@ -25,6 +32,14 @@ footer: '© 2026'
   - LinkedIn: santoshhari
   - BlueSky: @santoshhari.dev
   - GitHub: desinole
+
+<!--
+Presenter Notes:
+- Quick personal intro — keep it brief, audience is here for the content
+- Mention relevant experience with Azure, databases, or open source if applicable
+- Encourage attendees to connect afterwards for follow-up questions
+-->
+
 ---
 
 # **Agenda**
@@ -37,6 +52,14 @@ footer: '© 2026'
 6. 📐 Vector Index Algorithms (IVF, HNSW, DiskANN)
 7. 🧠 Vector Search & Competitor Comparison
 8. 🔍 **Demo:** Vector Search with DiskANN
+
+<!--
+Presenter Notes:
+- Walk through the agenda quickly — give audience a roadmap of what to expect
+- Highlight that there are multiple live demos throughout the talk
+- Mention the talk will go from concepts to hands-on in about 45 minutes
+- Note: vector search section is especially relevant for anyone building AI/ML applications
+-->
 
 ---
 
@@ -219,6 +242,17 @@ PostgreSQL already provides:
 
 **Azure DocumentDB = MongoDB ergonomics + PostgreSQL reliability**
 
+<!--
+Presenter Notes:
+- Key message: why build a new storage engine when PostgreSQL already solved the hard problems?
+- ACID transactions: guaranteed consistency — unlike eventual consistency in many NoSQL systems
+- Strong consistency: reads always reflect the latest writes — critical for finance, healthcare, inventory
+- Battle-tested: PostgreSQL has 30+ years of production hardening across every industry
+- Rich indexing: B-tree, hash, GIN, GiST, BRIN — far beyond what most document DBs offer
+- Operational tooling: pg_dump, pg_restore, replication, monitoring — your ops team already knows this
+- The pitch: don't choose between developer experience and reliability — DocumentDB gives you both
+-->
+
 ---
 <style>
   .columns {
@@ -296,6 +330,17 @@ From a SQL pro's perspective, DocumentDB represents a larger trend:
 - **Teams want JSON + ACID + portability**
 - **PostgreSQL keeps absorbing new workloads**
 - **Compatibility layers are strategic architectural tools**
+
+<!--
+Presenter Notes:
+- This slide is aimed at the SQL Server and relational DB crowd in the audience
+- Document model isn't a fad — JSON storage is now table stakes for modern applications
+- MongoDB's query language and drivers have become a de facto industry standard — like SQL for documents
+- The trend: developers want flexible schemas AND transactional guarantees — no more "pick one"
+- PostgreSQL is becoming the Swiss Army knife of databases — relational, JSON, time-series, vector, graph
+- Compatibility layers (like DocumentDB) are how the industry avoids "rip and replace" migrations
+- Career angle: DBAs who understand both relational and document models are more valuable
+-->
 
 ---
 
@@ -650,6 +695,14 @@ Presenter Notes:
 - 🐳 **Docker Image:** [mcr.microsoft.com/documentdb/documentdb](https://mcr.microsoft.com/documentdb/documentdb)
 - 🎯 **Demo Code:** [src/ in this repo](https://github.com/desinole/azure-documentdb/tree/main/src/)
 
+<!--
+Presenter Notes:
+- Pause here and let audience take a photo or note down the links
+- Highlight the GitHub repo — all demo code from this talk is available there
+- Mention the Docker image is the fastest way to get started locally
+- Vector search docs are especially useful for anyone building AI/RAG applications
+-->
+
 ---
 
 # **Thank You! 🙏**
@@ -660,4 +713,12 @@ Presenter Notes:
   - LinkedIn: santoshhari
   - BlueSky: @santoshhari.dev
   - GitHub: desinole
----
+
+<!--
+Presenter Notes:
+- Thank the audience for their time
+- Open the floor for Q&A
+- Remind them to connect on LinkedIn or BlueSky for follow-up questions
+- If time permits, offer to show any demo again or dive deeper into a topic
+-->
+
