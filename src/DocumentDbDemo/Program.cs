@@ -3,7 +3,9 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 
 // Connect to DocumentDB gateway
-var settings = MongoClientSettings.FromConnectionString("");
+var connectionString = Environment.GetEnvironmentVariable("DOCUMENTDB_CONNECTION_STRING")
+    ?? throw new InvalidOperationException("Set the DOCUMENTDB_CONNECTION_STRING environment variable.");
+var settings = MongoClientSettings.FromConnectionString(connectionString);
 settings.SslSettings = new SslSettings
 {
     ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true

@@ -46,6 +46,37 @@ Azure DocumentDB is an open source distributed database project that provides sc
 
 Refer to the README files in each subfolder for additional instructions and details.
 
+### Environment Variables
+
+Set the following environment variables before running the demo projects:
+
+**PowerShell:**
+```powershell
+$env:DOCUMENTDB_CONNECTION_STRING = "mongodb://admin:DocDBPass123!@localhost:10260/?tls=true&tlsAllowInvalidCertificates=true"
+$env:OPENAI_API_KEY = "sk-your-openai-api-key"
+```
+
+**Bash / macOS / Linux:**
+```bash
+export DOCUMENTDB_CONNECTION_STRING="mongodb://admin:DocDBPass123!@localhost:10260/?tls=true&tlsAllowInvalidCertificates=true"
+export OPENAI_API_KEY="sk-your-openai-api-key"
+```
+
+| Variable | Required By | Description |
+|----------|------------|-------------|
+| `DOCUMENTDB_CONNECTION_STRING` | Both demos | MongoDB connection string for DocumentDB |
+| `OPENAI_API_KEY` | Vector demo only | OpenAI API key for generating embeddings |
+
+### Running the Demos
+
+```bash
+# CRUD demo
+dotnet run --project src/DocumentDbDemo
+
+# Vector search demo (requires OPENAI_API_KEY)
+dotnet run --project src/DocumentDbVectorDemo
+```
+
 ## License
 
 See [LICENSE](./LICENSE) file for details.
