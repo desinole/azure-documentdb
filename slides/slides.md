@@ -218,11 +218,12 @@ Azure DocumentDB offers:
 
 <!--
 Presenter Notes:
-- Vendor lock-in is real: once you've built on MongoDB, switching databases means rewriting everything
-- Migration risk: rewriting queries, retesting, potential data loss, business disruption
-- Azure DocumentDB decouples the API from the product - you get MongoDB compatibility without MongoDB
-- Exit strategy: if you need to move off managed MongoDB, you have options
-- This is strategic: avoid single-vendor dependency for critical infrastructure
+- "How many of you have built something on MongoDB? Now imagine your CTO says 'we need to switch databases.' That's the nightmare scenario — and it happens more than you'd think."
+- "Once you've invested in MongoDB's query language, drivers, and data model, you're locked in. Rewriting thousands of queries isn't just expensive — it's risky. Every rewritten query is a potential bug."
+- "What DocumentDB says is: keep your code, keep your drivers, keep your queries — just swap out the engine underneath. Zero or near-zero code changes."
+- "Think of it like switching from one airline to another but keeping your frequent flyer miles. Same experience, different provider."
+- "The 'exit optionality' point is huge for enterprise architecture reviews. When leadership asks 'what's our exit strategy?' — you have an answer."
+- "This isn't just theoretical. Teams running on MongoDB Atlas who face pricing increases or compliance issues now have a real alternative without a rewrite."
 -->
 
 ---
@@ -298,22 +299,12 @@ Presenter Notes:
 </div>
 <!--
 Presenter Notes:
-- PostgreSQL has 30+ years of production hardening - this is not a new, unproven database
-- ACID transactions: guaranteed consistency, unlike eventual consistency models
-- Strong consistency: reads reflect all previous writes - critical for financial, healthcare, etc.
-- Durability guarantees: PostgreSQL's WAL (Write-Ahead Logging) is battle-tested
-- Indexing: B-tree, hash, GIN, GiST, BRIN - sophisticated index types for any workload
-- Operational tooling: pg_dump, pg_restore, replication, monitoring, backup tools - mature ecosystem
-- The proposition: don't choose between MongoDB's API and PostgreSQL's reliability - get both
-- Teams already know Postgres: DBAs, SREs, and ops teams have existing expertise
-- Existing infrastructure: leverage current PostgreSQL clusters, backups, monitoring
-- Cost savings: use existing Postgres licenses and infrastructure instead of new MongoDB clusters
-- Apache 2.0: truly open source, OSI-approved, no strings attached
-- Community-driven: not controlled by a single vendor with changing license terms
-- Cloud-neutral: works on Azure, AWS, GCP, on-prem - no lock-in
-- Platform builders: companies creating database-as-a-service can use DocumentDB without licensing concerns
-- Compliance-friendly: governments and regulated industries can adopt without legal reviews
-- Distribution-friendly: Linux distros can package and distribute without SSPL concerns
+- "Let's talk about what 'open source' actually means here. Apache 2.0 isn't just a label — it's a promise. You can fork it, modify it, build a product on it, sell it. No gotchas."
+- "Compare that to MongoDB's SSPL license. The short version: if you offer MongoDB as a service, you have to open source your entire stack. That's why AWS, Google, and every Linux distro walked away."
+- "For anyone in government or regulated industries — your legal team will love Apache 2.0. SSPL is a procurement nightmare. I've seen MongoDB deployments blocked for months by legal review."
+- "Cloud-neutral is a big deal too. You can run DocumentDB on Azure, AWS, GCP, or in your own data center. Try doing that with MongoDB Atlas — you're renting, not owning."
+- "Think about it from a platform builder's perspective. If you're building a database-as-a-service, you can embed DocumentDB without worrying about license violations. That's not possible with SSPL."
+- "The community angle matters long-term. With MongoDB, one company controls the roadmap. With DocumentDB on Apache 2.0, if Microsoft stops investing, the community can carry it forward. That's real open source insurance."
 -->
 
 ---
@@ -333,13 +324,12 @@ From a SQL pro's perspective, DocumentDB represents a larger trend:
 
 <!--
 Presenter Notes:
-- This slide is aimed at the SQL Server and relational DB crowd in the audience
-- Document model isn't a fad — JSON storage is now table stakes for modern applications
-- MongoDB's query language and drivers have become a de facto industry standard — like SQL for documents
-- The trend: developers want flexible schemas AND transactional guarantees — no more "pick one"
-- PostgreSQL is becoming the Swiss Army knife of databases — relational, JSON, time-series, vector, graph
-- Compatibility layers (like DocumentDB) are how the industry avoids "rip and replace" migrations
-- Career angle: DBAs who understand both relational and document models are more valuable
+- "Okay, show of hands — how many of you are SQL Server DBAs or come from a relational background? This slide is for you."
+- "I'm not here to tell you SQL Server is dead. Far from it. But the world your developers live in has changed. They're building APIs that think in JSON, not in rows and columns."
+- "Here's the uncomfortable truth: when developers can't get flexible schemas from the DBA team fast enough, they go rogue and spin up a MongoDB instance. DocumentDB gives you a way to meet them in the middle — document model with relational reliability underneath."
+- "MongoDB's query language has become the SQL of the document world. Whether you like it or not, your junior devs probably know MongoDB syntax better than T-SQL. That's the reality."
+- "PostgreSQL is quietly eating the database world. It started as relational, then added JSON, then time-series, then vector search. It's becoming the operating system of data. DocumentDB rides that wave."
+- "The career angle is real: DBAs who can speak both relational AND document are unicorns in the job market. This isn't about replacing what you know — it's about adding to your toolkit."
 -->
 
 ---
@@ -357,17 +347,11 @@ DocumentDB is part of the same movement as:
 
 <!--
 Presenter Notes:
-- This isn't about replacing SQL Server - it's about expanding your toolkit
-- Document model addresses real pain points: schema evolution, JSON-native apps, horizontal scale
-- MongoDB API is ubiquitous: drivers, tools, developer familiarity - it's become a standard interface
-- Modern apps demand: flexible schemas (JSON), transactional integrity (ACID), no vendor lock-in (portability)
-- PostgreSQL evolution: from relational purist to multi-model powerhouse - JSONB, time-series, graph
-- Compatibility layers lesson: Don't rebuild from scratch - translate and adapt (see: TDS, MySQL protocol compatibility)
-- Career perspective: DBAs who understand both relational AND document models are more valuable
-- Technology perspective: This is convergence, not replacement - SQL + JSON in the same ecosystem
-- FerretDB and Azure DocumentDB prove: PostgreSQL foundation + MongoDB interface = powerful combination
-- Strategic insight: Future databases will be multi-model with multiple API surfaces
-- Action item for DBAs: Learn document modeling, understand JSONB, explore PostgreSQL extensions
+- "This isn't happening in isolation. There's a whole movement of projects saying: 'let's keep PostgreSQL as the engine and put different APIs on top.'"
+- "FerretDB is doing the same thing as DocumentDB — MongoDB compatibility on Postgres. The fact that multiple projects are doing this tells you the demand is real."
+- "JSONB in PostgreSQL is already huge. Half the new Postgres schemas I see have at least one JSONB column. Developers want flexible fields without ALTER TABLE."
+- "The 'API-first' pattern is powerful. Instead of forcing everyone to learn a new query language, you meet them where they are. MongoDB devs get MongoDB syntax. SQL devs get SQL. Same data."
+- "For the architects in the room: this is how you avoid the 'best tool for the job' sprawl. Instead of running 5 different databases, you run PostgreSQL with different interfaces."
 -->
 
 ---
