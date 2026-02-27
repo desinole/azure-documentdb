@@ -499,9 +499,6 @@ Divides vectors into **clusters** (like zip codes). At query time, only searches
 ### **HNSW** — Hierarchical Navigable Small World
 Builds a **multi-layer graph** of connections between vectors (think express lanes on a highway). Top layers have long-distance links for fast traversal; bottom layers have fine-grained links for precision. High accuracy, but keeps **everything in memory**.
 
-### **DiskANN** — Disk-based ANN *(Microsoft Research)*
-Similar graph approach to HNSW, but engineered to work from **SSD storage** instead of RAM. Achieves comparable accuracy at a **fraction of the memory cost** — enabling billion-scale vector search.
-
 <!--
 Presenter Notes:
 - Start with WHY: brute-force search is O(n) — checking every vector is impractical at scale
@@ -510,13 +507,9 @@ Presenter Notes:
 - IVF weakness: if your query is near a cluster boundary, you might miss nearby vectors in adjacent clusters
 - HNSW analogy: like an airport hub system — fly to a hub (top layer), then to regional (mid layer), then to local (bottom layer)
 - HNSW strength: excellent recall and speed. Weakness: entire index must fit in RAM
-- DiskANN innovation: Microsoft Research figured out how to build a similar graph that pages efficiently from SSD
-- DiskANN means you can index 1 billion vectors on a machine with 64GB RAM instead of needing 1TB+
-- This is why DocumentDB chose DiskANN — it scales to real-world datasets without breaking the bank
 -->
 
 ---
-
 # **Vector Search with DiskANN 🧠**
 
 ## What is DiskANN?
