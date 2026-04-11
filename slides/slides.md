@@ -829,7 +829,7 @@ Presenter Notes:
 
 ---
 
-# **Distributed Architecture & Geo-Replication 🌍**
+# **Distributed Architecture 🌍**
 
 ## How DocumentDB Scales Out
 
@@ -850,20 +850,44 @@ Built on **Citus** (PostgreSQL's distributed extension):
   Worker 1  Worker 2  Worker N   ← Each holds a subset of shards
 ```
 
-- **Shard colocation** — related collections stay on the same node
-- **Reference tables** — metadata (collections, indexes, roles) replicated to all nodes
-- **Rebalancer** — redistributes shards when nodes are added or removed
-
 <!--
 Presenter Notes:
 - DocumentDB's distributed layer is the pg_documentdb_distributed extension, built on Citus
 - Citus is a proven PostgreSQL extension for horizontal sharding — used in production by thousands of companies
 - Coordinator node handles routing and metadata; worker nodes store the actual document shards
-- Shard colocation ensures related data stays together — reduces cross-node queries
+- The gateway sits in front of the coordinator and handles MongoDB wire protocol translation
+- Queries arrive as MongoDB commands, get translated to SQL, then the coordinator fans them out to workers
+- Each worker is a standard PostgreSQL instance running the pg_documentdb extension
+-->
+
+---
+
+# **Geo-Replication & Sharding 🌍**
+
+## Key Distribution Concepts
+
+- **Shard colocation** — related collections stay on the same node, reducing cross-node queries
+- **Reference tables** — metadata (collections, indexes, roles) replicated to all nodes
+- **Rebalancer** — redistributes shards when nodes are added or removed
+
+## Open Source vs Managed
+
+| | **Open Source** | **Azure Managed** |
+|---|---|---|
+| **Horizontal scaling** | ✅ Multi-node Citus cluster | ✅ Fully managed |
+| **Shard rebalancing** | ✅ Manual / automated | ✅ Automatic |
+| **Multi-region geo-replication** | ❌ | ✅ Built-in |
+| **Automatic failover** | ❌ | ✅ Built-in |
+
+<!--
+Presenter Notes:
+- Shard colocation ensures related data stays together — e.g., a user's documents and their indexes on the same worker
 - Reference tables replicate metadata to every node so each worker can resolve collection names and indexes locally
-- The open source version supports multi-node clusters within a datacenter
-- Full multi-region geo-replication with automatic failover is available through the managed Azure DocumentDB service
-- Think of it as: open source gives you horizontal scaling, Azure adds global distribution
+- The rebalancer moves shards when you add or remove workers — keeps data evenly distributed
+- Important distinction: the open source version gives you horizontal scaling within a datacenter
+- Full multi-region geo-replication with automatic failover is a premium feature of the managed Azure DocumentDB service
+- Think of it as: open source gives you scale-out, Azure adds global distribution and disaster recovery
+- For most dev/test and single-region production workloads, the open source version is more than sufficient
 -->
 
 ---
