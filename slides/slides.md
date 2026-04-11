@@ -550,17 +550,34 @@ Finding the **exact** nearest vector in millions of records is too slow. These a
 ### **IVF** — Inverted File Index
 Divides vectors into **clusters** (like zip codes). At query time, only searches the closest clusters instead of everything. Fast to build, but accuracy depends on hitting the right cluster.
 
-### **HNSW** — Hierarchical Navigable Small World
-Builds a **multi-layer graph** of connections between vectors (think express lanes on a highway). Top layers have long-distance links for fast traversal; bottom layers have fine-grained links for precision. High accuracy, but keeps **everything in memory**.
-
 <!--
 Presenter Notes:
 - Start with WHY: brute-force search is O(n) — checking every vector is impractical at scale
 - ANN algorithms give you 95-99% accuracy at 100-1000x the speed
 - IVF analogy: imagine sorting mail by zip code, then only checking the relevant zip codes
 - IVF weakness: if your query is near a cluster boundary, you might miss nearby vectors in adjacent clusters
+- IVF is the simplest ANN approach — good baseline, but largely superseded by HNSW and DiskANN
+-->
+
+---
+
+# **Vector Index Algorithms 101 📐**
+
+### **HNSW** — Hierarchical Navigable Small World
+Builds a **multi-layer graph** of connections between vectors (think express lanes on a highway). Top layers have long-distance links for fast traversal; bottom layers have fine-grained links for precision. High accuracy, but keeps **everything in memory**.
+
+### **DiskANN** — Disk-based ANN *(used by DocumentDB)*
+Similar graph structure to HNSW, but stores the index **on SSD instead of RAM**. Uses product quantization to keep a compressed version in memory for fast navigation, then fetches full vectors from disk. **Scales to billions of vectors** at a fraction of the memory cost.
+
+<!--
+Presenter Notes:
 - HNSW analogy: like an airport hub system — fly to a hub (top layer), then to regional (mid layer), then to local (bottom layer)
 - HNSW strength: excellent recall and speed. Weakness: entire index must fit in RAM
+- DiskANN is Microsoft Research's answer to HNSW's memory problem
+- DiskANN keeps a small compressed index in RAM for routing, full vectors live on SSD
+- At query time: navigate the compressed graph in memory, then do a single SSD read for the final candidates
+- Result: comparable recall to HNSW at 10-100x lower memory cost
+- DocumentDB supports both HNSW and DiskANN — choose based on your scale and budget
 -->
 
 ---
