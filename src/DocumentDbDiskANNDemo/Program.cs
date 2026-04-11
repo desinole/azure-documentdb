@@ -26,16 +26,16 @@ settings.SslSettings = new SslSettings
 };
 settings.ServerSelectionTimeout = TimeSpan.FromMinutes(5);
 var client = new MongoClient(settings);
-var db = client.GetDatabase("sampledb");
-var collection = db.GetCollection<BsonDocument>("words");
+var db = client.GetDatabase("sampledbdiskann");
+var collection = db.GetCollection<BsonDocument>("words_diskann");
 
-// --- Step 1: Create an HNSW vector index ---
-Console.WriteLine("Creating HNSW vector index on 'words' collection...");
+// --- Step 1: Create a DiskANN vector index ---
+Console.WriteLine("Creating DiskANN vector index on 'words_diskann' collection...");
 
 var createIndex = new BsonDocument
 {
     // Target collection to create the index on
-    { "createIndexes", "words" },
+    { "createIndexes", "words_diskann" },
     { "indexes", new BsonArray
         {
             new BsonDocument
@@ -46,17 +46,19 @@ var createIndex = new BsonDocument
                 { "key", new BsonDocument("embedding", "cosmosSearch") },
                 { "cosmosSearchOptions", new BsonDocument
                     {
-                        // "vector-hnsw" = Hierarchical Navigable Small World graph — an in-memory
-                        // ANN algorithm with high recall. Use "vector-diskann" for SSD-based search at larger scale.
-                        { "kind", "vector-hnsw" },
+                        // "vector-diskann" = Disk-based Approximate Nearest Neighbor (Microsoft Research).
+                        // Stores the index on SSD instead of RAM, enabling billion-scale vector search at lower cost.
+                        { "kind", "vector-diskann" },
                         // Must match the output size of the embedding model (text-embedding-3-small = 1536)
                         { "dimensions", dimensions },
                         // Similarity metric: COS = cosine similarity. Alternatives: IP (inner product), L2 (Euclidean)
                         { "similarity", "COS" },
-                        // Max bi-directional links per node in the graph. Higher = better recall, more memory. Default: 16
-                        { "m", 16 },
-                        // Neighbors evaluated during index construction. Higher = better quality index, slower build. Default: 64
-                        { "efConstruction", 64 }
+                        // Max degree of the graph (neighbors per node). Higher = better recall, more disk usage. Default: 32
+                        { "maxDegree", 32 },
+                        // Size of the candidate list during index build. Higher = better quality index, slower build. Default: 64
+                        { "lBuild", 64 },
+                        // Size of the candidate list during search. Higher = better recall, slower queries. Default: 40
+                        { "lSearch", 40 }
                     }
                 }
             }
@@ -65,7 +67,7 @@ var createIndex = new BsonDocument
 };
 
 db.RunCommand<BsonDocument>(createIndex, ReadPreference.Primary);
-Console.WriteLine("HNSW vector index created.\n");
+Console.WriteLine("DiskANN vector index created.\n");
 
 // --- Menu: Insert or Search ---
 Console.WriteLine("What would you like to do?");
