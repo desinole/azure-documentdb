@@ -870,7 +870,19 @@ Presenter Notes:
 - **Reference tables** — metadata (collections, indexes, roles) replicated to all nodes
 - **Rebalancer** — redistributes shards when nodes are added or removed
 
-## Open Source vs Managed
+<!--
+Presenter Notes:
+- Shard colocation ensures related data stays together — e.g., a user's documents and their indexes on the same worker
+- Reference tables replicate metadata to every node so each worker can resolve collection names and indexes locally
+- The rebalancer moves shards when you add or remove workers — keeps data evenly distributed
+- These are all features of the open source pg_documentdb_distributed extension built on Citus
+-->
+
+---
+
+# **Open Source vs Azure Managed 🌍**
+
+## Choosing Your Deployment Model
 
 | | **Open Source** | **Azure Managed** |
 |---|---|---|
@@ -879,15 +891,17 @@ Presenter Notes:
 | **Multi-region geo-replication** | ❌ | ✅ Built-in |
 | **Automatic failover** | ❌ | ✅ Built-in |
 
+- Open source gives you **scale-out** within a datacenter
+- Azure adds **global distribution** and **disaster recovery**
+
 <!--
 Presenter Notes:
-- Shard colocation ensures related data stays together — e.g., a user's documents and their indexes on the same worker
-- Reference tables replicate metadata to every node so each worker can resolve collection names and indexes locally
-- The rebalancer moves shards when you add or remove workers — keeps data evenly distributed
 - Important distinction: the open source version gives you horizontal scaling within a datacenter
 - Full multi-region geo-replication with automatic failover is a premium feature of the managed Azure DocumentDB service
 - Think of it as: open source gives you scale-out, Azure adds global distribution and disaster recovery
 - For most dev/test and single-region production workloads, the open source version is more than sufficient
+- You can start with open source locally, then migrate to Azure managed when you need multi-region
+- The code and queries are the same — only the infrastructure changes
 -->
 
 ---
