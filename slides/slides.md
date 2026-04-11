@@ -51,14 +51,16 @@ Presenter Notes:
 5. 🐳 **Demo:** Local Setup, CRUD, Querying
 6. 📐 Vector Index Algorithms (IVF, HNSW, DiskANN)
 7. 🧠 Vector Search & Competitor Comparison
-8. 🔍 **Demo:** Vector Search with DiskANN
+8. 🔍 **Demo:** Vector Search with HNSW
+9. 🔍 **Demo:** Vector Search with DiskANN
 
 <!--
 Presenter Notes:
 - Walk through the agenda quickly — give audience a roadmap of what to expect
 - Highlight that there are multiple live demos throughout the talk
 - Mention the talk will go from concepts to hands-on in about 45 minutes
-- Note: vector search section is especially relevant for anyone building AI/ML applications
+- Note: there are TWO vector search demos — one with HNSW (in-memory) and one with DiskANN (SSD-based)
+- Vector search section is especially relevant for anyone building AI/ML applications
 -->
 
 ---
@@ -394,10 +396,17 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 
 // Connect to DocumentDB gateway
-var client = new MongoClient(connectionString);
+var connectionString = Environment.GetEnvironmentVariable("DOCUMENTDB_CONNECTION_STRING")
+    ?? throw new InvalidOperationException(
+        "Set the DOCUMENTDB_CONNECTION_STRING environment variable.");
+var settings = MongoClientSettings.FromConnectionString(connectionString);
+settings.SslSettings = new SslSettings
+{
+    ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true
+};
+var client = new MongoClient(settings);
 
-// Create database and collection
-var db = client.GetDatabase("demo_db");
+var db = client.GetDatabase("sampledb");
 var collection = db.GetCollection<BsonDocument>("products");
 ```
 
@@ -406,9 +415,10 @@ var collection = db.GetCollection<BsonDocument>("products");
 <!--
 Presenter Notes:
 - Show the .NET console app running live against the local container
-- Emphasize that this is the standard MongoDB.Driver NuGet package — the same code works against MongoDB
+- Connection string comes from an environment variable — keeps credentials out of code
+- SslSettings callback accepts the self-signed cert from the local container
+- Emphasize: this is the standard MongoDB.Driver NuGet package — same code works against MongoDB
 - No special SDK or driver needed — existing MongoDB drivers just work
-- Point out the connection string uses the gateway port (10260)
 - Database and collection objects are lightweight handles — no network call until you actually read or write
 -->
 
@@ -419,24 +429,29 @@ Presenter Notes:
 ## Inserting Data
 
 ```csharp
-// Insert documents
-collection.InsertMany(new[] {
-    new BsonDocument { {"name","Laptop"}, {"price",1299.99}, {"category","electronics"} },
-    new BsonDocument { {"name","Headphones"}, {"price",79.99}, {"category","electronics"} },
-    new BsonDocument { {"name","Notebook"}, {"price",4.99}, {"category","office"} }
-});
+var products = new[] {
+    new BsonDocument { {"_id","prod-001"}, {"name","Laptop"},
+                       {"price",1299.99}, {"category","electronics"} },
+    new BsonDocument { {"_id","prod-002"}, {"name","Headphones"},
+                       {"price",79.99}, {"category","electronics"} },
+    new BsonDocument { {"_id","prod-003"}, {"name","Notebook"},
+                       {"price",4.99}, {"category","office"} }
+};
+
+collection.InsertMany(products, new InsertManyOptions { IsOrdered = false });
 ```
 
 - Database and collection are **created implicitly** on first insert
-- Documents are flexible — no predefined schema required
+- `IsOrdered = false` — continues inserting even if one document fails (e.g., duplicate `_id`)
 
 <!--
 Presenter Notes:
 - Walk through the InsertMany call — each BsonDocument is a flexible JSON-like object
+- Explicit _id fields make inserts idempotent — re-running the demo won't create duplicates
+- IsOrdered = false is a best practice for bulk inserts: skip duplicates, insert the rest
+- The actual demo code also catches MongoBulkWriteException to report how many were inserted vs skipped
 - Database and collection are created automatically on first insert — no need to pre-create them
-- Highlight schema flexibility: each document can have different fields if needed
 - This is identical to how you'd insert into MongoDB — the code is fully portable
-- Run the demo and show the inserted documents appearing in the container
 -->
 
 ---
@@ -645,57 +660,154 @@ Presenter Notes:
 
 ---
 
-# **Demo 4: Vector Search with DiskANN 🔍**
+# **Demo 4a: Vector Search with HNSW — Index 🔍**
 
-## .NET Vector Index Example
+## Creating an HNSW Vector Index
 
 ```csharp
-// Create a DiskANN vector index
-var createIndex = new BsonDocument("createIndexes", "products");
-createIndex.Add("indexes", new BsonArray {
-    new BsonDocument {
-        { "name", "vectorIndex" },
-        { "key", new BsonDocument("embedding", "cosmosSearch") },
-        { "cosmosSearchOptions", new BsonDocument {
-            { "kind", "vector-diskann" },
-            { "dimensions", 3 },
-            { "similarity", "COS" }
-        }}
-    }
-});
+var createIndex = new BsonDocument {
+    { "createIndexes", "words" },
+    { "indexes", new BsonArray {
+        new BsonDocument {
+            { "name", "vectorIndex" },
+            { "key", new BsonDocument("embedding", "cosmosSearch") },
+            { "cosmosSearchOptions", new BsonDocument {
+                { "kind", "vector-hnsw" },     // In-memory graph-based ANN algorithm
+                { "dimensions", 1536 },         // Must match embedding model output size
+                { "similarity", "COS" },        // Cosine similarity (alternatives: IP, L2)
+                { "m", 16 },                    // Bi-directional links per node
+                { "efConstruction", 64 }        // Candidates evaluated during build
+            }}
+        }
+    }}
+};
 db.RunCommand<BsonDocument>(createIndex);
 ```
 
 <!--
 Presenter Notes:
-- Show creating a DiskANN index — just a few lines of configuration
-- kind: "vector-diskann" is the key parameter
-- dimensions must match your embedding model output size
-- Similarity options: COS (cosine), L2 (Euclidean), IP (inner product)
+- This demo uses the DocumentDbVectorDemo project — HNSW index on 1000 Bogus-generated big-box-store product words
+- HNSW = Hierarchical Navigable Small World — a multi-layer graph that lives entirely in memory
+- "kind": "vector-hnsw" is the key switch — compare with "vector-diskann" in the next demo
+- dimensions: 1536 matches the OpenAI text-embedding-3-small model
+- similarity: COS (cosine) is best for normalized text embeddings; IP for dot product, L2 for Euclidean
+- m: controls graph connectivity — higher means better recall but more memory. 16 is a good default
+- efConstruction: how many candidates are evaluated when building the index — higher means better quality, slower build
+- The demo generates 1000 product words using Bogus (faker library) across 20 departments
 -->
 
 ---
-# **Demo 4: Vector Search with DiskANN 🔍**
 
-## .NET Vector Search Example
+# **Demo 4b: Vector Search with HNSW — Search 🔍**
+
+## Running a Similarity Search
 
 ```csharp
-// Vector similarity search
-var pipeline = new[] {
+var searchPipeline = new[] {
+    // $search — vector similarity search via the cosmosSearch index
     new BsonDocument("$search", new BsonDocument("cosmosSearch",
         new BsonDocument {
-            { "path", "embedding" },
-            { "vector", new BsonArray { 0.52, 0.28, 0.12 } },
-            { "k", 3 }
-        }))
+            { "path", "embedding" },    // Field containing stored vectors
+            { "vector", queryVector },  // Query embedding to compare against
+            { "k", 10 }                // Return top 10 nearest neighbors
+        })),
+    // $project — select which fields to include in results
+    new BsonDocument("$project", new BsonDocument {
+        { "word", 1 },                                          // Include word
+        { "score", new BsonDocument("$meta", "searchScore") }   // Cosine similarity (0–1)
+    }),
+    // $sort — most similar results first
+    new BsonDocument("$sort", new BsonDocument("score", -1))
 };
+var results = collection.Aggregate<BsonDocument>(searchPipeline).ToList();
 ```
 
 <!--
 Presenter Notes:
-- The $search aggregation stage performs the vector search
-- k parameter controls how many nearest neighbors to return
-- Run the .NET demo app to see results with similarity scores
+- The search pipeline is a standard MongoDB aggregation — three stages: $search, $project, $sort
+- $search with cosmosSearch triggers the vector index — this is where the ANN magic happens
+- "path" points to the field with stored embeddings, "vector" is the query embedding, "k" is top-k
+- $project selects output fields: "word" for the text, "searchScore" meta for the similarity score
+- $sort orders by score descending — most similar first
+- Live demo: type a search term like "camping gear" and see semantically similar products ranked by score
+- The SAME search pipeline works for both HNSW and DiskANN — only the index creation differs
+-->
+
+---
+
+# **Demo 5a: Vector Search with DiskANN — Index 🔍**
+
+## Creating a DiskANN Vector Index
+
+```csharp
+var createIndex = new BsonDocument {
+    { "createIndexes", "words_diskann" },
+    { "indexes", new BsonArray {
+        new BsonDocument {
+            { "name", "vectorIndex" },
+            { "key", new BsonDocument("embedding", "cosmosSearch") },
+            { "cosmosSearchOptions", new BsonDocument {
+                { "kind", "vector-diskann" },   // SSD-based ANN — scales to billions
+                { "dimensions", 1536 },          // Must match embedding model output size
+                { "similarity", "COS" },         // Cosine similarity (alternatives: IP, L2)
+                { "maxDegree", 32 },             // Graph neighbors per node
+                { "lBuild", 64 },                // Candidate list size during build
+                { "lSearch", 40 }                // Candidate list size during search
+            }}
+        }
+    }}
+};
+db.RunCommand<BsonDocument>(createIndex);
+```
+
+<!--
+Presenter Notes:
+- This demo uses the DocumentDbDiskANNDemo project — DiskANN index on 1000 Bogus-generated product words
+- Key difference from HNSW: "kind" is "vector-diskann" — the index lives on SSD, not in RAM
+- Same dimensions, same similarity metric, same data — only the index algorithm changes
+- DiskANN-specific parameters:
+  - maxDegree (32): max neighbors per node in the graph — higher means better recall, more disk I/O
+  - lBuild (64): candidate list during construction — higher means better index quality, slower build
+  - lSearch (40): candidate list during search — higher means better recall, slower queries
+- Compare with HNSW: m=16 and efConstruction=64 serve similar roles but for an in-memory graph
+- DiskANN's advantage: handles billion-scale datasets where HNSW would run out of memory
+- The collection name is "words_diskann" to keep data separate from the HNSW demo
+-->
+
+---
+
+# **Demo 5b: Vector Search with DiskANN — Search 🔍**
+
+## Running a Similarity Search
+
+```csharp
+var searchPipeline = new[] {
+    new BsonDocument("$search", new BsonDocument("cosmosSearch",
+        new BsonDocument {
+            { "path", "embedding" },    // Field containing stored vectors
+            { "vector", queryVector },  // Query embedding to compare against
+            { "k", 10 }                // Return top 10 nearest neighbors
+        })),
+    new BsonDocument("$project", new BsonDocument {
+        { "word", 1 },
+        { "score", new BsonDocument("$meta", "searchScore") }
+    }),
+    new BsonDocument("$sort", new BsonDocument("score", -1))
+};
+var results = collection.Aggregate<BsonDocument>(searchPipeline).ToList();
+```
+
+**Same search pipeline as HNSW — swap the index, keep your queries!** ✨
+
+<!--
+Presenter Notes:
+- The search pipeline is IDENTICAL to the HNSW demo — this is a key takeaway
+- You choose your index algorithm at creation time, but your application code doesn't change
+- This means you can benchmark HNSW vs DiskANN on the same data with zero code changes
+- Live demo: search for the same term as the HNSW demo — compare results and scores
+- In production, pick HNSW for small-to-medium datasets that fit in memory (fastest queries)
+- Pick DiskANN when your dataset grows beyond available RAM or you need to optimize cost
+- Both demos use Bogus to generate 1000 big-box-store product words across 20 departments
 -->
 
 ---
