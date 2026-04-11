@@ -441,7 +441,7 @@ Presenter Notes:
 
 ---
 
-# **Demo 3a: MongoDB Queries via mongosh 🔍**
+# **Demo 3a: mongosh — Connect & Query 🔍**
 
 ## Connect to the Gateway
 
@@ -449,18 +449,13 @@ Presenter Notes:
  docker exec -it documentdb-container mongosh "mongodb://admin:DocDBPass123!@localhost:10260/?tls=true&tlsAllowInvalidCertificates=true"
 ```
 
-## Run Queries
+## Find Documents
 
 ```javascript
 use sampledb
 
 // Find electronics over $100
 db.products.find({ category: "electronics", price: { $gt: 100 } })
-
-// Aggregation pipeline
-db.products.aggregate([
-  { $group: { _id: { $toLower: "$category" }, avgPrice: { $avg: "$price" } } }
-])
 ```
 
 **Standard MongoDB shell — no special syntax!** ✨
@@ -469,9 +464,34 @@ db.products.aggregate([
 Presenter Notes:
 - Show mongosh connecting to port 10260 — the MongoDB-compatible gateway
 - The connection string uses TLS with tlsAllowInvalidCertificates for the self-signed cert
-- Run familiar MongoDB queries — find, aggregate, etc.
+- Run the find query live — familiar MongoDB syntax, nothing DocumentDB-specific
 - Emphasize: this is the same mongosh you'd use with any MongoDB instance
 - The gateway translates these commands to PostgreSQL operations behind the scenes
+-->
+
+---
+
+# **Demo 3a: mongosh — Aggregation 🔍**
+
+## Aggregation Pipeline
+
+```javascript
+// Group by category and calculate average price
+db.products.aggregate([
+  { $group: { _id: { $toLower: "$category" }, avgPrice: { $avg: "$price" } } }
+])
+```
+
+- Full **aggregation pipeline** support — `$group`, `$match`, `$project`, `$sort`, and more
+- Same syntax you'd write against MongoDB Atlas or Community Edition
+
+<!--
+Presenter Notes:
+- Walk through the aggregation pipeline stages — $group with $toLower and $avg
+- Highlight that the aggregation framework is one of MongoDB's most powerful features — and it works here
+- Mention other supported stages: $match, $project, $sort, $unwind, $lookup, etc.
+- The gateway translates the entire pipeline into PostgreSQL execution plans
+- This is where DocumentDB's PostgreSQL foundation shines — complex aggregations leverage PostgreSQL's mature query optimizer
 -->
 
 ---
