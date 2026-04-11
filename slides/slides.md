@@ -829,6 +829,45 @@ Presenter Notes:
 
 ---
 
+# **Distributed Architecture & Geo-Replication 🌍**
+
+## How DocumentDB Scales Out
+
+Built on **Citus** (PostgreSQL's distributed extension):
+
+```
+         MongoDB Clients
+              │
+       ┌──────┴──────┐
+       │   Gateway    │   ← MongoDB wire protocol
+       └──────┬──────┘
+       ┌──────┴──────┐
+       │ Coordinator  │   ← Routes queries, manages metadata
+       └──┬───┬───┬──┘
+          │   │   │
+     ┌────┘   │   └────┐
+     ▼        ▼        ▼
+  Worker 1  Worker 2  Worker N   ← Each holds a subset of shards
+```
+
+- **Shard colocation** — related collections stay on the same node
+- **Reference tables** — metadata (collections, indexes, roles) replicated to all nodes
+- **Rebalancer** — redistributes shards when nodes are added or removed
+
+<!--
+Presenter Notes:
+- DocumentDB's distributed layer is the pg_documentdb_distributed extension, built on Citus
+- Citus is a proven PostgreSQL extension for horizontal sharding — used in production by thousands of companies
+- Coordinator node handles routing and metadata; worker nodes store the actual document shards
+- Shard colocation ensures related data stays together — reduces cross-node queries
+- Reference tables replicate metadata to every node so each worker can resolve collection names and indexes locally
+- The open source version supports multi-node clusters within a datacenter
+- Full multi-region geo-replication with automatic failover is available through the managed Azure DocumentDB service
+- Think of it as: open source gives you horizontal scaling, Azure adds global distribution
+-->
+
+---
+
 # **Resources**
 
 ## Learn More
