@@ -4,20 +4,18 @@ using MongoDB.Driver;
 using OpenAI.Embeddings;
 
 // --- OpenAI Embedding Setup ---
-// Set your OpenAI API key as an environment variable: OPENAI_API_KEY
 var openAiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
     ?? throw new InvalidOperationException("Set the OPENAI_API_KEY environment variable.");
 var embeddingClient = new EmbeddingClient("text-embedding-3-small", openAiKey);
 const int dimensions = 1536;
 
-// Helper: generate an embedding vector from text using OpenAI
 BsonArray GetEmbedding(string text)
 {
     var result = embeddingClient.GenerateEmbedding(text);
     return new BsonArray(result.Value.ToFloats().ToArray().Select(f => (double)f));
 }
 
-// Connect to DocumentDB gateway
+// --- Connect to DocumentDB ---
 var connectionString = Environment.GetEnvironmentVariable("DOCUMENTDB_CONNECTION_STRING")
     ?? throw new InvalidOperationException("Set the DOCUMENTDB_CONNECTION_STRING environment variable.");
 var settings = MongoClientSettings.FromConnectionString(connectionString);
@@ -28,14 +26,14 @@ settings.SslSettings = new SslSettings
 settings.ServerSelectionTimeout = TimeSpan.FromMinutes(5);
 var client = new MongoClient(settings);
 var db = client.GetDatabase("sampledb");
-var collection = db.GetCollection<BsonDocument>("products");
+var collection = db.GetCollection<BsonDocument>("words");
 
-// --- Step 1: Create a DiskANN vector index ---
-Console.WriteLine("Creating DiskANN vector index...");
+// --- Step 1: Create an HNSW vector index ---
+Console.WriteLine("Creating HNSW vector index on 'words' collection...");
 
 var createIndex = new BsonDocument
 {
-    { "createIndexes", "products" },
+    { "createIndexes", "words" },
     { "indexes", new BsonArray
         {
             new BsonDocument
@@ -44,11 +42,11 @@ var createIndex = new BsonDocument
                 { "key", new BsonDocument("embedding", "cosmosSearch") },
                 { "cosmosSearchOptions", new BsonDocument
                     {
-                        { "kind", "vector-diskann" },
+                        { "kind", "vector-hnsw" },
                         { "dimensions", dimensions },
                         { "similarity", "COS" },
-                        { "maxDegree", 32 },
-                        { "lBuild", 64 }
+                        { "m", 16 },
+                        { "efConstruction", 64 }
                     }
                 }
             }
@@ -57,47 +55,45 @@ var createIndex = new BsonDocument
 };
 
 db.RunCommand<BsonDocument>(createIndex, ReadPreference.Primary);
-Console.WriteLine("DiskANN index created.");
+Console.WriteLine("HNSW vector index created.\n");
 
-// Create a standard index on category for filtered vector search
-collection.Indexes.CreateOne(new CreateIndexModel<BsonDocument>(
-    Builders<BsonDocument>.IndexKeys.Ascending("category"),
-    new CreateIndexOptions { Name = "category_1" }));
-Console.WriteLine("Category filter index created.\n");
+// --- Step 2: Prompt user for words, generate embeddings, and insert ---
+Console.WriteLine("Enter words to store (type 'exit' or 'quit' to finish):");
 
-// --- Step 2: Insert documents with OpenAI-generated embeddings ---
-Console.WriteLine("Generating embeddings via OpenAI and inserting documents...");
-
-var products = new[]
+var wordCount = 0;
+while (true)
 {
-    ("vec-001", "Wireless Headphones", "electronics", 79.99),
-    ("vec-002", "Bluetooth Speaker", "electronics", 49.99),
-    ("vec-003", "Notebook", "office", 4.99),
-    ("vec-004", "Gaming Laptop", "electronics", 1299.99)
-};
+    Console.Write($"  Word {wordCount + 1}: ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrEmpty(input))
+        continue;
+    if (input.Equals("exit", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("quit", StringComparison.OrdinalIgnoreCase))
+        break;
 
-var documents = new List<BsonDocument>();
-foreach (var (id, name, category, price) in products)
-{
-    Console.WriteLine($"  Generating embedding for: {name}");
-    var embedding = GetEmbedding($"{name} - {category}");
-    documents.Add(new BsonDocument
+    Console.WriteLine($"    Generating embedding for: \"{input}\"");
+    var embedding = GetEmbedding(input);
+    collection.InsertOne(new BsonDocument
     {
-        { "_id", id },
-        { "name", name },
-        { "category", category },
-        { "price", price },
+        { "word", input },
         { "embedding", embedding }
     });
+    wordCount++;
+    Console.WriteLine($"    Stored \"{input}\".");
 }
 
-collection.InsertMany(documents);
-Console.WriteLine($"Inserted {documents.Count} documents.\n");
+Console.WriteLine($"\nInserted {wordCount} words total.\n");
 
-// --- Step 3: Vector similarity search ---
-// Generate an embedding for the search query using the same model
-var searchQuery = "premium audio equipment";
-Console.WriteLine($"Searching for: \"{searchQuery}\"");
+// --- Step 3: Prompt user for search term and perform vector search ---
+Console.Write("Enter a search term: ");
+var searchQuery = Console.ReadLine()?.Trim();
+if (string.IsNullOrEmpty(searchQuery))
+{
+    Console.WriteLine("No search term provided. Exiting.");
+    return;
+}
+
+Console.WriteLine($"Searching for words similar to: \"{searchQuery}\"");
 var queryVector = GetEmbedding(searchQuery);
 
 var searchPipeline = new[]
@@ -107,53 +103,23 @@ var searchPipeline = new[]
         {
             { "path", "embedding" },
             { "vector", queryVector },
-            { "k", 3 }
+            { "k", wordCount > 0 ? wordCount : 10 }
         })),
     new BsonDocument("$project", new BsonDocument
     {
-        { "name", 1 },
-        { "category", 1 },
-        { "price", 1 },
-        { "similarityScore", new BsonDocument("$meta", "searchScore") }
-    })
+        { "word", 1 },
+        { "score", new BsonDocument("$meta", "searchScore") }
+    }),
+    new BsonDocument("$sort", new BsonDocument("score", -1))
 };
 
 var results = collection.Aggregate<BsonDocument>(searchPipeline).ToList();
 
-Console.WriteLine("Top 3 similar products:");
+Console.WriteLine("\nResults (sorted by similarity, descending):");
+Console.WriteLine($"  {"Rank",-6} {"Word",-20} {"Score"}");
+Console.WriteLine($"  {new string('-', 40)}");
+var rank = 1;
 foreach (var doc in results)
 {
-    Console.WriteLine($"  {doc["name"],-25} | {doc["category"],-12} | ${doc["price"],-8} | score: {doc["similarityScore"]:F4}");
-}
-
-// --- Step 4: Filtered vector search ---
-var filteredQuery = "portable music device";
-Console.WriteLine($"\nFiltered search (electronics only): \"{filteredQuery}\"");
-var filteredQueryVector = GetEmbedding(filteredQuery);
-
-var filteredPipeline = new[]
-{
-    new BsonDocument("$search", new BsonDocument("cosmosSearch",
-        new BsonDocument
-        {
-            { "path", "embedding" },
-            { "vector", filteredQueryVector },
-            { "k", 3 },
-            { "filter", new BsonDocument("category", new BsonDocument("$regex", new BsonRegularExpression("^electronics$", "i"))) }
-        })),
-    new BsonDocument("$project", new BsonDocument
-    {
-        { "name", 1 },
-        { "category", 1 },
-        { "price", 1 },
-        { "similarityScore", new BsonDocument("$meta", "searchScore") }
-    })
-};
-
-var filteredResults = collection.Aggregate<BsonDocument>(filteredPipeline).ToList();
-
-Console.WriteLine("Similar electronics:");
-foreach (var doc in filteredResults)
-{
-    Console.WriteLine($"  {doc["name"],-25} | ${doc["price"],-8} | score: {doc["similarityScore"]:F4}");
+    Console.WriteLine($"  {rank++,-6} {doc["word"],-20} {doc["score"]:F6}");
 }

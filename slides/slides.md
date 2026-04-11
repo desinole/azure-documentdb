@@ -385,27 +385,20 @@ Presenter Notes:
 
 ---
 
-# **Demo 2: .NET Client App 🟣**
+# **Demo 2a: .NET Client App — Connect 🟣**
 
-## Creating Database, Collection & Inserting Data
+## Connecting to DocumentDB
 
 ```csharp
 using MongoDB.Driver;
 using MongoDB.Bson;
 
 // Connect to DocumentDB gateway
-var client = new MongoClient("mongodb://admin:YourPassword123!@localhost:10260");
+var client = new MongoClient(connectionString);
 
 // Create database and collection
 var db = client.GetDatabase("demo_db");
 var collection = db.GetCollection<BsonDocument>("products");
-
-// Insert documents
-collection.InsertMany(new[] {
-    new BsonDocument { {"name","Laptop"}, {"price",1299.99}, {"category","electronics"} },
-    new BsonDocument { {"name","Headphones"}, {"price",79.99}, {"category","electronics"} },
-    new BsonDocument { {"name","Notebook"}, {"price",4.99}, {"category","office"} }
-});
 ```
 
 **Standard MongoDB.Driver NuGet — zero DocumentDB-specific code!** ✨
@@ -415,8 +408,35 @@ Presenter Notes:
 - Show the .NET console app running live against the local container
 - Emphasize that this is the standard MongoDB.Driver NuGet package — the same code works against MongoDB
 - No special SDK or driver needed — existing MongoDB drivers just work
-- Database and collection are created implicitly on first insert
 - Point out the connection string uses the gateway port (10260)
+- Database and collection objects are lightweight handles — no network call until you actually read or write
+-->
+
+---
+
+# **Demo 2b: .NET Client App — Insert 🟣**
+
+## Inserting Data
+
+```csharp
+// Insert documents
+collection.InsertMany(new[] {
+    new BsonDocument { {"name","Laptop"}, {"price",1299.99}, {"category","electronics"} },
+    new BsonDocument { {"name","Headphones"}, {"price",79.99}, {"category","electronics"} },
+    new BsonDocument { {"name","Notebook"}, {"price",4.99}, {"category","office"} }
+});
+```
+
+- Database and collection are **created implicitly** on first insert
+- Documents are flexible — no predefined schema required
+
+<!--
+Presenter Notes:
+- Walk through the InsertMany call — each BsonDocument is a flexible JSON-like object
+- Database and collection are created automatically on first insert — no need to pre-create them
+- Highlight schema flexibility: each document can have different fields if needed
+- This is identical to how you'd insert into MongoDB — the code is fully portable
+- Run the demo and show the inserted documents appearing in the container
 -->
 
 ---
@@ -426,7 +446,7 @@ Presenter Notes:
 ## Connect to the Gateway
 
 ```bash
-mongosh "mongodb://admin:DocDBPass123!@localhost:10260/?tls=true&tlsAllowInvalidCertificates=true"
+ docker exec -it documentdb-container mongosh "mongodb://admin:DocDBPass123!@localhost:10260/?tls=true&tlsAllowInvalidCertificates=true"
 ```
 
 ## Run Queries
@@ -468,8 +488,7 @@ docker exec -it documentdb-container psql -U admin -d postgres -p 9712
 
 ```sql
 -- Same data, queried with SQL
-SELECT document FROM documentdb_api.collection('sampledb', 'products')
-WHERE document @? '{"category": {"$regex": "electronics", "$options": "i"}}';
+SELECT document FROM documentdb_api.collection('sampledb', 'products') WHERE document @@ '{"category": {"$regex": "electronics", "$options": "i"}}';
 ```
 
 **Same data, different query language!** ✨
