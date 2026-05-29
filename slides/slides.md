@@ -839,10 +839,10 @@ Built on **Citus** (PostgreSQL's distributed extension):
          MongoDB Clients
               │
        ┌──────┴──────┐
-       │   Gateway    │   ← MongoDB wire protocol
+       │   Gateway   │   ← MongoDB wire protocol
        └──────┬──────┘
        ┌──────┴──────┐
-       │ Coordinator  │   ← Routes queries, manages metadata
+       │ Coordinator │   ← Routes queries, manages metadata
        └──┬───┬───┬──┘
           │   │   │
      ┌────┘   │   └────┐

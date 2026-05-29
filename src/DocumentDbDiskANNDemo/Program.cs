@@ -69,28 +69,40 @@ var createIndex = new BsonDocument
 db.RunCommand<BsonDocument>(createIndex, ReadPreference.Primary);
 Console.WriteLine("DiskANN vector index created.\n");
 
-// --- Menu: Insert or Search ---
-Console.WriteLine("What would you like to do?");
-Console.WriteLine("  1) Insert records");
-Console.WriteLine("  2) Search records");
-Console.Write("Enter choice (1 or 2): ");
-var choice = Console.ReadLine()?.Trim();
+// --- Search timing stats ---
+var searchCount = 0;
+var totalSearchMs = 0.0;
 
-if (choice == "1")
+// --- Menu: Insert, Search, or Quit ---
+while (true)
 {
-    InsertRecords();
-}
-else if (choice == "2")
-{
-    SearchRecords();
-}
-else
-{
-    Console.WriteLine("Invalid choice. Exiting.");
-    return;
+    Console.WriteLine("What would you like to do?");
+    Console.WriteLine("  1) Insert records");
+    Console.WriteLine("  2) Search records");
+    Console.WriteLine("  3) Quit");
+    Console.Write("Enter choice (1, 2, or 3): ");
+    var choice = Console.ReadLine()?.Trim();
+
+    if (choice == "1")
+    {
+        InsertRecords();
+    }
+    else if (choice == "2")
+    {
+        SearchRecords();
+    }
+    else if (choice == "3")
+    {
+        Console.WriteLine("Goodbye!");
+        return;
+    }
+    else
+    {
+        Console.WriteLine("Invalid choice. Try again.\n");
+    }
 }
 
-// --- Insert path: Generate 1000 big-box-store product words with Bogus ---
+// --- Insert path: Generate 10000 big-box-store product words with Bogus ---
 void InsertRecords()
 {
     var departments = new[]
@@ -126,8 +138,9 @@ void InsertRecords()
     };
 
     var faker = new Faker();
-    const int totalRecords = 1000;
-    const int batchSize = 50;
+    const int totalRecords = 10000;
+    const int batchSize = 100;
+    const int maxParallelEmbeddings = 10;
 
     Console.WriteLine($"\nGenerating {totalRecords} big-box-store product words...");
 
@@ -154,28 +167,40 @@ void InsertRecords()
     }
 
     var wordCount = words.Count;
-    Console.WriteLine($"Inserting {wordCount} words in batches of {batchSize}...\n");
+    var batches = words
+        .Select((word, idx) => (word, idx))
+        .GroupBy(x => x.idx / batchSize)
+        .Select(g => g.Select(x => x.word).ToList())
+        .ToList();
 
-    for (var i = 0; i < words.Count; i += batchSize)
+    Console.WriteLine($"Inserting {wordCount} words in {batches.Count} batches of {batchSize} " +
+                      $"({maxParallelEmbeddings} parallel embedding threads)...\n");
+
+    var inserted = 0;
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+
+    foreach (var batch in batches)
     {
-        var batch = words.Skip(i).Take(batchSize).ToList();
-        var docs = new List<BsonDocument>();
-
-        foreach (var word in batch)
+        // Parallelize embedding generation — the main bottleneck (OpenAI API calls)
+        var docs = new BsonDocument[batch.Count];
+        Parallel.For(0, batch.Count, new ParallelOptions { MaxDegreeOfParallelism = maxParallelEmbeddings }, i =>
         {
-            var embedding = GetEmbedding(word);
-            docs.Add(new BsonDocument
+            var embedding = GetEmbedding(batch[i]);
+            docs[i] = new BsonDocument
             {
-                { "word", word },
+                { "word", batch[i] },
                 { "embedding", embedding }
-            });
-        }
+            };
+        });
 
         collection.InsertMany(docs);
-        Console.WriteLine($"  Inserted batch {i / batchSize + 1} ({Math.Min(i + batchSize, words.Count)}/{wordCount})");
+        inserted += batch.Count;
+        Console.WriteLine($"  Inserted {inserted}/{wordCount} " +
+                          $"({100.0 * inserted / wordCount:F0}% — {sw.Elapsed.TotalSeconds:F1}s elapsed)");
     }
 
-    Console.WriteLine($"\nInserted {wordCount} words total.");
+    sw.Stop();
+    Console.WriteLine($"\nInserted {wordCount} words total in {sw.Elapsed.TotalSeconds:F1}s.");
 }
 
 // --- Search path: Prompt user for search term and perform vector search ---
@@ -190,7 +215,10 @@ void SearchRecords()
     }
 
     Console.WriteLine($"Searching for words similar to: \"{searchQuery}\"");
+
+    var swEmbed = System.Diagnostics.Stopwatch.StartNew();
     var queryVector = GetEmbedding(searchQuery);
+    swEmbed.Stop();
 
     var searchPipeline = new[]
     {
@@ -217,7 +245,9 @@ void SearchRecords()
         new BsonDocument("$sort", new BsonDocument("score", -1))
     };
 
+    var swSearch = System.Diagnostics.Stopwatch.StartNew();
     var results = collection.Aggregate<BsonDocument>(searchPipeline).ToList();
+    swSearch.Stop();
 
     Console.WriteLine("\nResults (sorted by similarity, descending):");
     Console.WriteLine($"  {"Rank",-6} {"Word",-20} {"Score"}");
@@ -227,4 +257,15 @@ void SearchRecords()
     {
         Console.WriteLine($"  {rank++,-6} {doc["word"],-20} {doc["score"]:F6}");
     }
+
+    searchCount++;
+    totalSearchMs += swSearch.Elapsed.TotalMilliseconds;
+    var avgMs = totalSearchMs / searchCount;
+
+    Console.WriteLine();
+    Console.WriteLine($"  ⏱  Embedding: {swEmbed.Elapsed.TotalMilliseconds:F1}ms | " +
+                      $"Search: {swSearch.Elapsed.TotalMilliseconds:F1}ms | " +
+                      $"Total: {swEmbed.Elapsed.TotalMilliseconds + swSearch.Elapsed.TotalMilliseconds:F1}ms");
+    Console.WriteLine($"  📊 Session: {searchCount} searches | " +
+                      $"Avg search: {avgMs:F1}ms\n");
 }
