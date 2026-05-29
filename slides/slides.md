@@ -47,10 +47,10 @@ Presenter Notes:
 1. 📌 Introduction to Azure DocumentDB
 2. 🏗️ Architecture Overview
 3. 🎯 Why DocumentDB? Why Now?
-4. 🆚 Why SQL Server / DBAs Should Care
-5. 🐳 **Demo:** Local Setup, CRUD, Querying
+4. 🐳 **Demo:** Local Setup, CRUD, Querying
+5. 🤖 Why Vector & AI Matters
 6. 📐 Vector Index Algorithms (IVF, HNSW, DiskANN)
-7. 🧠 Vector Search & Competitor Comparison
+7. 🧠 Integrated Vector Search & Competitor Comparison
 8. 🔍 **Demo:** Vector Search with HNSW
 9. 🔍 **Demo:** Vector Search with DiskANN
 
@@ -311,53 +311,6 @@ Presenter Notes:
 
 ---
 
-
-# **Why SQL Server / DBAs Should Care**
-
-## A Strategic Shift in Database Architecture
-
-From a SQL pro's perspective, DocumentDB represents a larger trend:
-
-- **The document model is here to stay**
-- **MongoDB's API has become a de facto standard**
-- **Teams want JSON + ACID + portability**
-- **PostgreSQL keeps absorbing new workloads**
-- **Compatibility layers are strategic architectural tools**
-
-<!--
-Presenter Notes:
-- "Okay, show of hands — how many of you are SQL Server DBAs or come from a relational background? This slide is for you."
-- "I'm not here to tell you SQL Server is dead. Far from it. But the world your developers live in has changed. They're building APIs that think in JSON, not in rows and columns."
-- "Here's the uncomfortable truth: when developers can't get flexible schemas from the DBA team fast enough, they go rogue and spin up a MongoDB instance. DocumentDB gives you a way to meet them in the middle — document model with relational reliability underneath."
-- "MongoDB's query language has become the SQL of the document world. Whether you like it or not, your junior devs probably know MongoDB syntax better than T-SQL. That's the reality."
-- "PostgreSQL is quietly eating the database world. It started as relational, then added JSON, then time-series, then vector search. It's becoming the operating system of data. DocumentDB rides that wave."
-- "The career angle is real: DBAs who can speak both relational AND document are unicorns in the job market. This isn't about replacing what you know — it's about adding to your toolkit."
--->
-
----
-
-# **Why SQL Server / DBAs Should Care**
-
-## Part of a Broader Movement
-
-DocumentDB is part of the same movement as:
-
-- **Azure DocumentDB** - MongoDB API on PostgreSQL
-- **FerretDB** - Open source MongoDB compatibility
-- **PostgreSQL JSONB adoption** - Native JSON handling
-- **"API-first databases"** - Protocol compatibility over native implementation
-
-<!--
-Presenter Notes:
-- "This isn't happening in isolation. There's a whole movement of projects saying: 'let's keep PostgreSQL as the engine and put different APIs on top.'"
-- "FerretDB is doing the same thing as DocumentDB — MongoDB compatibility on Postgres. The fact that multiple projects are doing this tells you the demand is real."
-- "JSONB in PostgreSQL is already huge. Half the new Postgres schemas I see have at least one JSONB column. Developers want flexible fields without ALTER TABLE."
-- "The 'API-first' pattern is powerful. Instead of forcing everyone to learn a new query language, you meet them where they are. MongoDB devs get MongoDB syntax. SQL devs get SQL. Same data."
-- "For the architects in the room: this is how you avoid the 'best tool for the job' sprawl. Instead of running 5 different databases, you run PostgreSQL with different interfaces."
--->
-
----
-
 # **Demo 1: Setting Up DocumentDB Locally 🐳**
 
 ## Running DocumentDB in a Container
@@ -541,6 +494,29 @@ Presenter Notes:
 
 ---
 
+# **Why Vector & AI Matters 🤖**
+
+## From Keywords to Meaning
+
+- **LLMs and RAG** need a place to store and search **embeddings**
+- Traditional queries match **exact keywords** — AI needs **semantic similarity**
+- Embeddings turn text, images, and audio into **vectors of meaning**
+- Every AI app must answer one question: *"What's most similar to this?"*
+
+**Your operational data and your AI data don't have to live in two systems.**
+
+<!--
+Presenter Notes:
+- This is the pivot slide — we move from "DocumentDB is a great Mongo workload database" to "DocumentDB is where your AI data lives too"
+- RAG (Retrieval-Augmented Generation) is the dominant pattern for grounding LLMs in your own data
+- The core mechanic: convert content into embeddings (vectors), then find the nearest vectors to a query
+- Keyword search finds "laptop"; vector search finds "portable computer", "notebook PC", "MacBook" — meaning, not just text
+- The big idea for the rest of the talk: you already store the documents here — store and search the vectors here too
+- No separate vector database, no sync pipeline, no second system to operate — that's the selling point we'll prove
+-->
+
+---
+
 # **Vector Index Algorithms 101 📐**
 
 ## How Do You Search Millions of Vectors Quickly?
@@ -610,32 +586,6 @@ Presenter Notes:
 
 ---
 
-# **Azure DocumentDB vs Competitors**
-
-| Feature | **DocumentDB** | **Pinecone** | **Weaviate** | **Qdrant** | **Milvus** | **pgvector** |
-|---------|---------------|-------------|-------------|-----------|-----------|-------------|
-| **Index** | DiskANN | Proprietary | HNSW | HNSW | Multiple | HNSW/IVF |
-| **Self-Host** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Scale** | 500K+ vectors | Large | Medium | Medium | Large | Small |
-| **Memory** | Low (SSD) | Managed | High | High | High | High |
-| **Filtered Search** | ✅ Native | ✅ | ✅ | ✅ | ✅ | ❌ Limited |
-| **DB Integration** | DocumentDB | Vector-only | Vector-only | Vector-only | Vector-only | PostgreSQL extension |
-
-<!--
-Presenter Notes:
-- DocumentDB's key differentiator: DiskANN index + integrated document database + MongoDB API
-- Pinecone: fully managed but proprietary, no self-hosting, vendor lock-in, vectors only
-- Weaviate: good open source option but requires separate infrastructure — another service to manage
-- Qdrant: performant Rust-based engine, but standalone — not integrated with your document data
-- Milvus: powerful but complex distributed system, steep operational learning curve
-- pgvector: closest competitor on PostgreSQL, but lacks DiskANN's scale — limited to HNSW and IVF
-- Only DocumentDB gives you: document store + vector search + MongoDB API + SQL access in one system
-- No data duplication, no sync pipelines, no extra infrastructure
-- DiskANN's SSD-based design means you don't need expensive high-memory instances
--->
-
----
-
 # **Vector Search with DiskANN **
 
 ## Why DiskANN in DocumentDB?
@@ -673,6 +623,32 @@ Presenter Notes:
 - 16K dimensions supports modern embedding models (OpenAI, Cohere, etc.)
 - RAG pattern: store documents + embeddings together, retrieve context for LLM prompts
 - This is the convergence story: your operational DB IS your vector DB
+-->
+
+---
+
+# **Azure DocumentDB vs Competitors**
+
+| Feature | **DocumentDB** | **Pinecone** | **Weaviate** | **Qdrant** | **Milvus** | **pgvector** |
+|---------|---------------|-------------|-------------|-----------|-----------|-------------|
+| **Index** | DiskANN | Proprietary | HNSW | HNSW | Multiple | HNSW/IVF |
+| **Self-Host** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Scale** | 500K+ vectors | Large | Medium | Medium | Large | Small |
+| **Memory** | Low (SSD) | Managed | High | High | High | High |
+| **Filtered Search** | ✅ Native | ✅ | ✅ | ✅ | ✅ | ❌ Limited |
+| **DB Integration** | DocumentDB | Vector-only | Vector-only | Vector-only | Vector-only | PostgreSQL extension |
+
+<!--
+Presenter Notes:
+- DocumentDB's key differentiator: DiskANN index + integrated document database + MongoDB API
+- Pinecone: fully managed but proprietary, no self-hosting, vendor lock-in, vectors only
+- Weaviate: good open source option but requires separate infrastructure — another service to manage
+- Qdrant: performant Rust-based engine, but standalone — not integrated with your document data
+- Milvus: powerful but complex distributed system, steep operational learning curve
+- pgvector: closest competitor on PostgreSQL, but lacks DiskANN's scale — limited to HNSW and IVF
+- Only DocumentDB gives you: document store + vector search + MongoDB API + SQL access in one system
+- No data duplication, no sync pipelines, no extra infrastructure
+- DiskANN's SSD-based design means you don't need expensive high-memory instances
 -->
 
 ---
@@ -839,10 +815,10 @@ Built on **Citus** (PostgreSQL's distributed extension):
          MongoDB Clients
               │
        ┌──────┴──────┐
-       │   Gateway    │   ← MongoDB wire protocol
+       │   Gateway   │   ← MongoDB wire protocol
        └──────┬──────┘
        ┌──────┴──────┐
-       │ Coordinator  │   ← Routes queries, manages metadata
+       │ Coordinator │   ← Routes queries, manages metadata
        └──┬───┬───┬──┘
           │   │   │
      ┌────┘   │   └────┐
