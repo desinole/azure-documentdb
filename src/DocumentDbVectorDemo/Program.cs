@@ -27,15 +27,15 @@ settings.SslSettings = new SslSettings
 settings.ServerSelectionTimeout = TimeSpan.FromMinutes(5);
 var client = new MongoClient(settings);
 var db = client.GetDatabase("sampledb");
-var collection = db.GetCollection<BsonDocument>("words");
+var collection = db.GetCollection<BsonDocument>("products");
 
 // --- Step 1: Create an HNSW vector index ---
-Console.WriteLine("Creating HNSW vector index on 'words' collection...");
+Console.WriteLine("Creating HNSW vector index on 'products' collection...");
 
 var createIndex = new BsonDocument
 {
-    // Target collection to create the index on
-    { "createIndexes", "words" },
+    // Target collection to create the index on (must match the collection used for insert/search)
+    { "createIndexes", "products" },
     { "indexes", new BsonArray
         {
             new BsonDocument
@@ -136,8 +136,8 @@ void InsertRecords()
     };
 
     var faker = new Faker();
-    const int totalRecords = 200;
-    const int batchSize = 50;
+    const int totalRecords = 10000;
+    const int batchSize = 100;
 
     Console.WriteLine($"\nGenerating {totalRecords} big-box-store product words...");
 

@@ -26,16 +26,16 @@ settings.SslSettings = new SslSettings
 };
 settings.ServerSelectionTimeout = TimeSpan.FromMinutes(5);
 var client = new MongoClient(settings);
-var db = client.GetDatabase("sampledbdiskann");
-var collection = db.GetCollection<BsonDocument>("words_diskann");
+var db = client.GetDatabase("sampledb");
+var collection = db.GetCollection<BsonDocument>("products");
 
 // --- Step 1: Create a DiskANN vector index ---
-Console.WriteLine("Creating DiskANN vector index on 'words_diskann' collection...");
+Console.WriteLine("Creating DiskANN vector index on 'products' collection...");
 
 var createIndex = new BsonDocument
 {
     // Target collection to create the index on
-    { "createIndexes", "words_diskann" },
+    { "createIndexes", "products" },
     { "indexes", new BsonArray
         {
             new BsonDocument

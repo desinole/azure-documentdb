@@ -665,11 +665,11 @@ var createIndex = new BsonDocument {
             { "name", "vectorIndex" },
             { "key", new BsonDocument("embedding", "cosmosSearch") },
             { "cosmosSearchOptions", new BsonDocument {
-                { "kind", "vector-hnsw" },     // In-memory graph-based ANN algorithm
-                { "dimensions", 1536 },         // Must match embedding model output size
-                { "similarity", "COS" },        // Cosine similarity (alternatives: IP, L2)
-                { "m", 16 },                    // Bi-directional links per node
-                { "efConstruction", 64 }        // Candidates evaluated during build
+                { "kind", "vector-hnsw" },     // Builds a fast in-memory graph for quick similarity lookups
+                { "dimensions", 1536 },         // Length of each vector — must match your embedding model's output
+                { "similarity", "COS" },        // Ranks matches by the angle between vectors — best for text
+                { "m", 16 },                    // Neighbors each item links to — higher means more accurate but more memory
+                { "efConstruction", 64 }        // Effort spent while building — higher means better quality but slower
             }}
         }
     }}
@@ -700,14 +700,14 @@ var searchPipeline = new[] {
     // $search — vector similarity search via the cosmosSearch index
     new BsonDocument("$search", new BsonDocument("cosmosSearch",
         new BsonDocument {
-            { "path", "embedding" },    // Field containing stored vectors
-            { "vector", queryVector },  // Query embedding to compare against
-            { "k", 10 }                // Return top 10 nearest neighbors
+            { "path", "embedding" },    // The document field where each item's vector is stored
+            { "vector", queryVector },  // Your search text as a vector, compared against the stored ones
+            { "k", 10 }                // How many of the closest matches to return
         })),
     // $project — select which fields to include in results
     new BsonDocument("$project", new BsonDocument {
-        { "word", 1 },                                          // Include word
-        { "score", new BsonDocument("$meta", "searchScore") }   // Cosine similarity (0–1)
+        { "word", 1 },                                          // Include the matched word in the results
+        { "score", new BsonDocument("$meta", "searchScore") }   // How close the match is — 0 (unrelated) to 1 (identical)
     }),
     // $sort — most similar results first
     new BsonDocument("$sort", new BsonDocument("score", -1))
@@ -734,18 +734,18 @@ Presenter Notes:
 
 ```csharp
 var createIndex = new BsonDocument {
-    { "createIndexes", "words_diskann" },
+    { "createIndexes", "products" },
     { "indexes", new BsonArray {
         new BsonDocument {
             { "name", "vectorIndex" },
             { "key", new BsonDocument("embedding", "cosmosSearch") },
             { "cosmosSearchOptions", new BsonDocument {
-                { "kind", "vector-diskann" },   // SSD-based ANN — scales to billions
-                { "dimensions", 1536 },          // Must match embedding model output size
-                { "similarity", "COS" },         // Cosine similarity (alternatives: IP, L2)
-                { "maxDegree", 32 },             // Graph neighbors per node
-                { "lBuild", 64 },                // Candidate list size during build
-                { "lSearch", 40 }                // Candidate list size during search
+                { "kind", "vector-diskann" },   // Stores the index on SSD so it scales to billions of vectors
+                { "dimensions", 1536 },          // Length of each vector — must match your embedding model's output
+                { "similarity", "COS" },         // Ranks matches by the angle between vectors — best for text
+                { "maxDegree", 32 },             // Neighbors each item links to — higher means more accurate but more disk
+                { "lBuild", 64 },                // Effort spent while building — higher means better quality but slower
+                { "lSearch", 40 }                // Candidates checked per query — higher means more accurate but slower
             }}
         }
     }}
@@ -764,7 +764,7 @@ Presenter Notes:
   - lSearch (40): candidate list during search — higher means better recall, slower queries
 - Compare with HNSW: m=16 and efConstruction=64 serve similar roles but for an in-memory graph
 - DiskANN's advantage: handles billion-scale datasets where HNSW would run out of memory
-- The collection name is "words_diskann" to keep data separate from the HNSW demo
+- The collection name is "products" to keep data separate from the HNSW demo
 -->
 
 ---
@@ -777,9 +777,9 @@ Presenter Notes:
 var searchPipeline = new[] {
     new BsonDocument("$search", new BsonDocument("cosmosSearch",
         new BsonDocument {
-            { "path", "embedding" },    // Field containing stored vectors
-            { "vector", queryVector },  // Query embedding to compare against
-            { "k", 10 }                // Return top 10 nearest neighbors
+            { "path", "embedding" },    // The document field where each item's vector is stored
+            { "vector", queryVector },  // Your search text as a vector, compared against the stored ones
+            { "k", 10 }                // How many of the closest matches to return
         })),
     new BsonDocument("$project", new BsonDocument {
         { "word", 1 },
