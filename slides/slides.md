@@ -86,7 +86,7 @@ Presenter Notes:
 - **MongoDB-compatible API** running on **PostgreSQL**
 - Built for **cloud-native** applications
 - Designed for **horizontal scalability**
-- **ACID transactions** at document and collection level
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#acid" target="_blank"><strong>ACID transactions</strong></a> at document and collection level
 - **Global distribution** capabilities
 
 <!--
@@ -380,7 +380,7 @@ db.products.aggregate([
 ])
 ```
 
-- Full **aggregation pipeline** support — `$group`, `$match`, `$project`, `$sort`, and more
+- Full <a href="https://desinole.github.io/azure-documentdb/glossary.html#aggregation-pipeline" target="_blank"><strong>aggregation pipeline</strong></a> support — `$group`, `$match`, `$project`, `$sort`, and more
 - Same syntax you'd write against MongoDB Atlas or Community Edition
 
 <!--
@@ -428,9 +428,9 @@ Presenter Notes:
 
 ## From Keywords to Meaning
 
-- **LLMs and RAG** need a place to store and search **embeddings**
-- Traditional queries match **exact keywords** — AI needs **semantic similarity**
-- Embeddings turn text, images, and audio into **vectors of meaning**
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#llm" target="_blank"><strong>LLMs</strong></a> and <a href="https://desinole.github.io/azure-documentdb/glossary.html#rag" target="_blank"><strong>RAG</strong></a> need a place to store and search <a href="https://desinole.github.io/azure-documentdb/glossary.html#embedding" target="_blank"><strong>embeddings</strong></a>
+- Traditional queries match **exact keywords** — AI needs <a href="https://desinole.github.io/azure-documentdb/glossary.html#semantic-search" target="_blank"><strong>semantic similarity</strong></a>
+- Embeddings turn text, images, and audio into <a href="https://desinole.github.io/azure-documentdb/glossary.html#vector" target="_blank"><strong>vectors of meaning</strong></a>
 - Every AI app must answer one question: *"What's most similar to this?"*
 
 **Your operational data and your AI data don't have to live in two systems.**
@@ -451,9 +451,9 @@ Presenter Notes:
 
 ## How Do You Search Millions of Vectors Quickly?
 
-Finding the **exact** nearest vector in millions of records is too slow. These algorithms trade a tiny bit of accuracy for massive speed gains — called **Approximate Nearest Neighbor (ANN)** search.
+Finding the **exact** nearest vector in millions of records is too slow. These algorithms trade a tiny bit of accuracy for massive speed gains — called <a href="https://desinole.github.io/azure-documentdb/glossary.html#ann" target="_blank"><strong>Approximate Nearest Neighbor (ANN)</strong></a> search.
 
-### **IVF** — Inverted File Index
+### <a href="https://desinole.github.io/azure-documentdb/glossary.html#ivf" target="_blank"><strong>IVF</strong></a> — Inverted File Index
 Divides vectors into **clusters** (like zip codes). At query time, only searches the closest clusters instead of everything. Fast to build, but accuracy depends on hitting the right cluster.
 
 <!--
@@ -469,11 +469,11 @@ Presenter Notes:
 
 # **Vector Index Algorithms 101 📐**
 
-### **HNSW** — Hierarchical Navigable Small World
+### <a href="https://desinole.github.io/azure-documentdb/glossary.html#hnsw" target="_blank"><strong>HNSW</strong></a> — Hierarchical Navigable Small World
 Builds a **multi-layer graph** of connections between vectors (think express lanes on a highway). Top layers have long-distance links for fast traversal; bottom layers have fine-grained links for precision. High accuracy, but keeps **everything in memory**.
 
-### **DiskANN** — Disk-based ANN *(used by DocumentDB)*
-Similar graph structure to HNSW, but stores the index **on SSD instead of RAM**. Uses product quantization to keep a compressed version in memory for fast navigation, then fetches full vectors from disk. **Scales to billions of vectors** at a fraction of the memory cost.
+### <a href="https://desinole.github.io/azure-documentdb/glossary.html#diskann" target="_blank"><strong>DiskANN</strong></a> — Disk-based ANN *(used by DocumentDB)*
+Similar graph structure to HNSW, but stores the index **on SSD instead of RAM**. Uses <a href="https://desinole.github.io/azure-documentdb/glossary.html#product-quantization" target="_blank">product quantization</a> to keep a compressed version in memory for fast navigation, then fetches full vectors from disk. **Scales to billions of vectors** at a fraction of the memory cost.
 
 <!--
 Presenter Notes:
@@ -493,7 +493,7 @@ Presenter Notes:
 
 - **Disk-based Approximate Nearest Neighbor** search algorithm
 - Developed by **Microsoft Research**
-- Graph-structured index for **scalable vector search**
+- Graph-structured index for <a href="https://desinole.github.io/azure-documentdb/glossary.html#vector-search" target="_blank"><strong>scalable vector search</strong></a>
 - Handles **billions of vectors** without requiring all data in memory
 - Open source: [github.com/microsoft/DiskANN](https://github.com/microsoft/DiskANN)
 
@@ -526,7 +526,7 @@ Presenter Notes:
 - **No data sync pipelines** to build and maintain
 - Query vectors and documents in the **same query**
 - Native support for **filtered vector search** (geo, text, numeric)
-- Supports up to **16,000 dimensions** with product quantization
+- Supports up to <a href="https://desinole.github.io/azure-documentdb/glossary.html#dimensions" target="_blank"><strong>16,000 dimensions</strong></a> with product quantization
 
 <!--
 Presenter Notes:
@@ -544,6 +544,7 @@ Presenter Notes:
 
 - 🔍 **Semantic search** over product catalogs
 - 🤖 **RAG** (Retrieval-Augmented Generation) for AI apps
+
 - 🎯 **Recommendation engines** with contextual filtering
 - 📍 **Location-aware similarity** (vector + geospatial)
 
@@ -768,7 +769,7 @@ Presenter Notes:
 
 ---
 
-# **Geo-Replication & Sharding 🌍**
+# **<a href="https://desinole.github.io/azure-documentdb/glossary.html#geo-replication" target="_blank">Geo-Replication</a> & <a href="https://desinole.github.io/azure-documentdb/glossary.html#sharding" target="_blank">Sharding</a> 🌍**
 
 ## Key Distribution Concepts
 

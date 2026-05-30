@@ -37,24 +37,73 @@ jobs:
 
       - name: Build HTML presentation
         run: |
-          marp slides/*.md \
+          marp slides/slides.md \
             --html \
             --allow-local-files \
             --output dist/index.html
 
       - name: Build PDF presentation
         run: |
-          marp slides/*.md \
+          marp slides/slides.md \
             --pdf \
             --allow-local-files \
             --output dist/presentation.pdf
 
       - name: Build PPTX presentation
         run: |
-          marp slides/*.md \
+          marp slides/slides.md \
             --pptx \
             --allow-local-files \
             --output dist/presentation.pptx
+
+      - name: Build glossary page
+        run: |
+          npm install -g marked
+          marked -i slides/glossary.md -o dist/glossary.inner.html
+          cat > dist/glossary.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Glossary - Azure DocumentDB</title>
+          <style>
+            :root { color-scheme: light; }
+            body {
+              font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+              line-height: 1.6;
+              color: #1a1a1a;
+              max-width: 760px;
+              margin: 0 auto;
+              padding: 2rem 1.25rem 4rem;
+            }
+            h1 { font-size: 2rem; border-bottom: 2px solid #4285f4; padding-bottom: .4rem; }
+            h2 {
+              font-size: 1.25rem;
+              margin-top: 2rem;
+              scroll-margin-top: 1rem;
+              color: #1a237e;
+            }
+            h2:target {
+              background: #fff7d6;
+              padding: .2rem .4rem;
+              border-radius: 4px;
+            }
+            a { color: #1a73e8; }
+            p { margin: .4rem 0 0; }
+            html { scroll-behavior: smooth; }
+          </style>
+          </head>
+          <body>
+          <main>
+          EOF
+          cat dist/glossary.inner.html >> dist/glossary.html
+          cat >> dist/glossary.html << 'EOF'
+          </main>
+          </body>
+          </html>
+          EOF
+          rm dist/glossary.inner.html
 
       - name: Copy images
         run: |
@@ -72,6 +121,7 @@ jobs:
           - [View HTML Presentation](./index.html)
           - [Download PDF](./presentation.pdf)
           - [Download PPTX](./presentation.pptx)
+          - [Glossary](./glossary.html)
 
           ## Source
 
