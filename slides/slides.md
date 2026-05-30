@@ -22,6 +22,23 @@ Presenter Notes:
 
 ---
 
+# **Follow Along 📲**
+
+![w:280](img/talk-qr.png)
+
+**All content from this talk (slides, demo code, and setup instructions) lives in this GitHub repo:**
+
+### [github.com/desinole/azure-documentdb](https://github.com/desinole/azure-documentdb)
+
+<!--
+Presenter Notes:
+- Scan the QR code now if you'd like to follow along with the slides and code as we go
+- Everything in this talk (the slides, all demo projects, and setup steps) is in this one repo
+- I'll show this QR code again at the end, so no need to rush
+-->
+
+---
+
 # **Speaker Introduction**
 
 <!-- Add your information here -->
@@ -44,15 +61,10 @@ Presenter Notes:
 
 # **Agenda**
 
-1. 📌 Introduction to Azure DocumentDB
-2. 🏗️ Architecture Overview
-3. 🎯 Why DocumentDB? Why Now?
-4. 🐳 **Demo:** Local Setup, CRUD, Querying
-5. 🤖 Why Vector & AI Matters
-6. 📐 Vector Index Algorithms (IVF, HNSW, DiskANN)
-7. 🧠 Integrated Vector Search & Competitor Comparison
-8. 🔍 **Demo:** Vector Search with HNSW
-9. 🔍 **Demo:** Vector Search with DiskANN
+1. 🏗️ What is DocumentDB & why it matters
+2. 🐳 **Demo:** Local setup, CRUD & querying
+3. 🤖 Vector search & AI fundamentals
+4. 🔍 **Demo:** Vector search with HNSW & DiskANN
 
 <!--
 Presenter Notes:
@@ -135,43 +147,14 @@ Presenter Notes:
 
 ## Core Components
 
-### **pg_documentdb_gw** (Gateway)
-MongoDB wire protocol handler and request router
-
-### **pg_documentdb** (Extension)
-Core MongoDB-compatible functionality in PostgreSQL
-
-### **pg_documentdb_core** (Foundation)
-Low-level BSON processing and document operations
+![w:560](img/core-components.svg)
 
 <!--
 Presenter Notes:
-
-**pg_documentdb_gw (Gateway Layer)**
-- Entry point for all MongoDB client connections
-- Handles MongoDB wire protocol translation
-- Manages connection pooling and load balancing
-- Performs TLS termination and authentication
-- Routes requests to appropriate PostgreSQL instances
-- Think of it as the "adapter" between MongoDB clients and PostgreSQL backend
-
-**pg_documentdb (PostgreSQL Extension)**
-- The main extension loaded into PostgreSQL
-- Implements MongoDB query language and commands
-- Provides collection management (create, drop, list)
-- Handles CRUD operations (insert, find, update, delete)
-- Implements aggregation pipeline
-- Manages indexes and query optimization
-- This is where MongoDB semantics meet PostgreSQL storage
-
-**pg_documentdb_core (Core Library)**
-- Foundational layer for document processing
-- BSON (Binary JSON) encoding/decoding
-- Document validation and schema enforcement
-- Low-level data type conversions
-- Efficient document storage structures
-- Shared library used by both gateway and extension
-- Performance-critical path for all document operations
+- Gateway: the adapter between MongoDB clients and PostgreSQL. Translates wire protocol, handles auth, TLS, and connection pooling.
+- Extension: runs the MongoDB query language, CRUD, and aggregation inside PostgreSQL. This is where MongoDB semantics meet PostgreSQL storage.
+- Core: the foundation. BSON encode/decode and document storage, shared by both layers above.
+- Walk the diagram top to bottom: a request flows client to gateway to extension to core to PostgreSQL.
 -->
 
 ---
@@ -254,59 +237,6 @@ Presenter Notes:
 - Rich indexing: B-tree, hash, GIN, GiST, BRIN — far beyond what most document DBs offer
 - Operational tooling: pg_dump, pg_restore, replication, monitoring — your ops team already knows this
 - The pitch: don't choose between developer experience and reliability — DocumentDB gives you both
--->
-
----
-<style>
-  .columns {
-    display: flex;
-    height: 80%; /* Adjust height as needed */
-    justify-content: space-evenly;
-    align-items: center;
-  }
-  .column {
-    flex: 1;
-    padding: 0 20px; /* Add some spacing */
-  }
-</style>
-# **Why Azure DocumentDB Exists**
-
-## The Core Problems It Solves
-
-### A Truly Open Alternative
-
-<div class="columns">
-  <div class="column">
-    Azure DocumentDB is:
-
-    - Apache 2.0 licensed
-    
-    - Community-driven
-    
-    - Cloud-neutral
-    
-    - Vendor-agnostic
-  </div>
-  <div class="column">
-    This matters for:
-
-    - Governments
-    
-    - Regulated industries
-    
-    - Linux distributions
-    
-    - Companies building database platforms
-  </div>
-</div>
-<!--
-Presenter Notes:
-- "Let's talk about what 'open source' actually means here. Apache 2.0 isn't just a label — it's a promise. You can fork it, modify it, build a product on it, sell it. No gotchas."
-- "Compare that to MongoDB's SSPL license. The short version: if you offer MongoDB as a service, you have to open source your entire stack. That's why AWS, Google, and every Linux distro walked away."
-- "For anyone in government or regulated industries — your legal team will love Apache 2.0. SSPL is a procurement nightmare. I've seen MongoDB deployments blocked for months by legal review."
-- "Cloud-neutral is a big deal too. You can run DocumentDB on Azure, AWS, GCP, or in your own data center. Try doing that with MongoDB Atlas — you're renting, not owning."
-- "Think about it from a platform builder's perspective. If you're building a database-as-a-service, you can embed DocumentDB without worrying about license violations. That's not possible with SSPL."
-- "The community angle matters long-term. With MongoDB, one company controls the roadmap. With DocumentDB on Apache 2.0, if Microsoft stops investing, the community can carry it forward. That's real open source insurance."
 -->
 
 ---
@@ -666,10 +596,10 @@ var createIndex = new BsonDocument {
             { "key", new BsonDocument("embedding", "cosmosSearch") },
             { "cosmosSearchOptions", new BsonDocument {
                 { "kind", "vector-hnsw" },     // Builds a fast in-memory graph for quick similarity lookups
-                { "dimensions", 1536 },         // Length of each vector — must match your embedding model's output
-                { "similarity", "COS" },        // Ranks matches by the angle between vectors — best for text
-                { "m", 16 },                    // Neighbors each item links to — higher means more accurate but more memory
-                { "efConstruction", 64 }        // Effort spent while building — higher means better quality but slower
+                { "dimensions", 1536 },         // Vector length; must match your embedding model's output
+                { "similarity", "COS" },        // Ranks matches by the angle between vectors, best for text
+                { "m", 16 },                    // Neighbors each item links to; higher means more accurate but more memory
+                { "efConstruction", 64 }        // Effort spent while building; higher means better quality but slower
             }}
         }
     }}
@@ -707,7 +637,7 @@ var searchPipeline = new[] {
     // $project — select which fields to include in results
     new BsonDocument("$project", new BsonDocument {
         { "word", 1 },                                          // Include the matched word in the results
-        { "score", new BsonDocument("$meta", "searchScore") }   // How close the match is — 0 (unrelated) to 1 (identical)
+        { "score", new BsonDocument("$meta", "searchScore") }   // How close the match is, from 0 (unrelated) to 1 (identical)
     }),
     // $sort — most similar results first
     new BsonDocument("$sort", new BsonDocument("score", -1))
@@ -741,11 +671,11 @@ var createIndex = new BsonDocument {
             { "key", new BsonDocument("embedding", "cosmosSearch") },
             { "cosmosSearchOptions", new BsonDocument {
                 { "kind", "vector-diskann" },   // Stores the index on SSD so it scales to billions of vectors
-                { "dimensions", 1536 },          // Length of each vector — must match your embedding model's output
-                { "similarity", "COS" },         // Ranks matches by the angle between vectors — best for text
-                { "maxDegree", 32 },             // Neighbors each item links to — higher means more accurate but more disk
-                { "lBuild", 64 },                // Effort spent while building — higher means better quality but slower
-                { "lSearch", 40 }                // Candidates checked per query — higher means more accurate but slower
+                { "dimensions", 1536 },          // Vector length; must match your embedding model's output
+                { "similarity", "COS" },         // Ranks matches by the angle between vectors, best for text
+                { "maxDegree", 32 },             // Neighbors each item links to; higher means more accurate but more disk
+                { "lBuild", 64 },                // Effort spent while building; higher means better quality but slower
+                { "lSearch", 40 }                // Candidates checked per query; higher means more accurate but slower
             }}
         }
     }}
@@ -919,4 +849,21 @@ Presenter Notes:
 - Remind them to connect on LinkedIn or BlueSky for follow-up questions
 - If time permits, offer to show any demo again or dive deeper into a topic
 -->
+
+---
+
+# **📲 Get the Talk Content**
+
+![w:280](img/talk-qr.png)
+
+**Everything from this talk (slides, demo code, and resources) is in this GitHub repo:**
+
+### [github.com/desinole/azure-documentdb](https://github.com/desinole/azure-documentdb)
+
+<!--
+Presenter Notes:
+- Final reminder: scan the QR code to grab all the slides, demo projects, and resources
+- This is the same repo from the opening "Follow Along" slide; everything is there to try at home
+-->
+
 

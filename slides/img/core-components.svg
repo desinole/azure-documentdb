@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="760" height="430" fill="#ffffff"/>
+
+  <!-- MongoDB clients -->
+  <rect x="230" y="20" width="300" height="50" rx="8" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+  <text x="380" y="50" text-anchor="middle" font-size="20" fill="#1a237e" font-weight="bold">MongoDB clients &amp; drivers</text>
+
+  <!-- arrow -->
+  <line x1="380" y1="70" x2="380" y2="95" stroke="#5f6368" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Gateway -->
+  <rect x="130" y="100" width="500" height="70" rx="8" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+  <text x="380" y="128" text-anchor="middle" font-size="20" fill="#b3261e" font-weight="bold">pg_documentdb_gw</text>
+  <text x="380" y="152" text-anchor="middle" font-size="15" fill="#5f6368">Gateway: wire protocol handler &amp; request router</text>
+
+  <line x1="380" y1="170" x2="380" y2="195" stroke="#5f6368" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Extension -->
+  <rect x="130" y="200" width="500" height="70" rx="8" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+  <text x="380" y="228" text-anchor="middle" font-size="20" fill="#137333" font-weight="bold">pg_documentdb</text>
+  <text x="380" y="252" text-anchor="middle" font-size="15" fill="#5f6368">Extension: MongoDB query &amp; aggregation in PostgreSQL</text>
+
+  <line x1="380" y1="270" x2="380" y2="295" stroke="#5f6368" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Core -->
+  <rect x="130" y="300" width="500" height="70" rx="8" fill="#fef7e0" stroke="#fbbc04" stroke-width="2"/>
+  <text x="380" y="328" text-anchor="middle" font-size="20" fill="#b06000" font-weight="bold">pg_documentdb_core</text>
+  <text x="380" y="352" text-anchor="middle" font-size="15" fill="#5f6368">Foundation: BSON processing &amp; document storage</text>
+
+  <!-- PostgreSQL base -->
+  <rect x="230" y="390" width="300" height="30" rx="6" fill="#eef2f6" stroke="#5f6368" stroke-width="1.5"/>
+  <text x="380" y="410" text-anchor="middle" font-size="15" fill="#202124" font-weight="bold">PostgreSQL</text>
+
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#5f6368"/>
+    </marker>
+  </defs>
+</svg>
