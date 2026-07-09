@@ -14,6 +14,10 @@ A vector is an ordered list of numbers. In AI, an embedding is a vector, and eac
 
 Vector search finds the items whose vectors sit closest to a query vector. It ranks results by meaning rather than exact keyword matches.
 
+<h2 id="vector-database">Vector database</h2>
+
+A vector database stores embeddings and runs vector search over them at scale, usually with a specialized index. DocumentDB adds this capability to your existing document store, so operational data and vectors live in one system.
+
 <h2 id="semantic-search">Semantic search</h2>
 
 Semantic search matches on meaning. A search for "couch" can return "sofa" because their embeddings are close, even though the words differ.

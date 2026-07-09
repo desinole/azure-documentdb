@@ -126,6 +126,33 @@ Presenter Notes:
 
 ---
 
+# **Document vs Relational: How Data Lives**
+
+| Aspect | **MongoDB / DocumentDB** | **SQL Server** |
+|---|---|---|
+| **Stored as** | One <a href="https://desinole.github.io/azure-documentdb/glossary.html#bson" target="_blank"><strong>BSON</strong></a> document (nested JSON) | Rows in normalized tables |
+| **Related data** | Embedded in the document | Split across tables via foreign keys |
+| **Read back** | One read fetches the whole entity | `JOIN` tables to reassemble it |
+| **Query with** | Find + <a href="https://desinole.github.io/azure-documentdb/glossary.html#aggregation-pipeline" target="_blank"><strong>aggregation</strong></a> | SQL `SELECT … JOIN … GROUP BY` |
+| **Schema change** | Just write new fields | `ALTER TABLE` migration |
+
+**Same order:** one document vs `Orders` + `OrderItems` rows joined every read.
+
+<!--
+Presenter Notes:
+- Purpose: give the room a concrete mental model before we go deeper — most people know SQL Server, fewer know the document model
+- The core contrast is locality: MongoDB keeps an entity together in ONE document; SQL Server splits it across normalized tables to avoid duplication
+- Walk the "same order" example: in SQL Server an order is a row in Orders plus N rows in OrderItems, plus maybe Customers — you JOIN them back together every read. In MongoDB that whole order (line items and all) is a single document you read in one shot
+- Storage side: BSON is binary JSON — flexible fields per document; SQL Server rows must match a fixed table schema defined by DDL
+- Retrieval side: document read = one lookup, no joins; relational read = joins to reassemble the entity. This is why document DBs shine for read-heavy, entity-at-a-time workloads
+- Trade-off honesty: normalization (SQL Server) avoids data duplication and is great for cross-entity analytics; denormalization (documents) trades some duplication for read speed and schema flexibility
+- Schema change: adding a field is a write in MongoDB vs an ALTER TABLE migration in SQL Server — the flexible-schema advantage from the previous slide, made concrete
+- Tie-back: DocumentDB gives you the MongoDB document model on a PostgreSQL engine, so you get this document experience with a relational database underneath
+- Note: this compares the document model to the relational model generally; SQL Server does have a native JSON type and columnstore, but the row/table model is still its default storage unit
+-->
+
+---
+
 # **Architecture Overview**
 
 ## High-Level Design
@@ -443,6 +470,38 @@ Presenter Notes:
 - Keyword search finds "laptop"; vector search finds "portable computer", "notebook PC", "MacBook" — meaning, not just text
 - The big idea for the rest of the talk: you already store the documents here — store and search the vectors here too
 - No separate vector database, no sync pipeline, no second system to operate — that's the selling point we'll prove
+-->
+
+---
+
+# **Key Terms in 60 Seconds 📖**
+
+## The AI Vocabulary for This Talk
+
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#embedding" target="_blank"><strong>Embedding</strong></a> — a list of numbers that captures the *meaning* of text, an image, or audio
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#vector" target="_blank"><strong>Vector</strong></a> — that list of numbers; each one is a coordinate in high-dimensional space
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#vector-search" target="_blank"><strong>Vector search</strong></a> — find the items whose vectors sit *closest* to your query
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#semantic-search" target="_blank"><strong>Semantic search</strong></a> — matching on meaning, so "couch" finds "sofa"
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#vector-database" target="_blank"><strong>Vector database</strong></a> — stores embeddings *and* searches them at scale (that's DocumentDB)
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#rag" target="_blank"><strong>RAG</strong></a> — feed an <a href="https://desinole.github.io/azure-documentdb/glossary.html#llm" target="_blank"><strong>LLM</strong></a> your own documents (found via vector search) before it answers
+- <a href="https://desinole.github.io/azure-documentdb/glossary.html#ann" target="_blank"><strong>ANN</strong></a> — approximate nearest neighbor: trade a little accuracy for huge speed
+
+### 👀 What we'll actually show today
+
+✅ **Embeddings + vector database + vector search** — DocumentDB storing and searching vectors, using <a href="https://desinole.github.io/azure-documentdb/glossary.html#hnsw" target="_blank"><strong>HNSW</strong></a> (Demo 4) and <a href="https://desinole.github.io/azure-documentdb/glossary.html#diskann" target="_blank"><strong>DiskANN</strong></a> (Demo 5) indexes
+
+📌 **RAG & LLMs** — explained as the *why*, but the generation step is out of scope; our demos focus on the retrieval half that DocumentDB powers
+
+<!--
+Presenter Notes:
+- Purpose of this slide: give everyone a shared vocabulary before we go deep — don't assume the room knows these terms
+- Keep it fast: this is a 60-second orientation, not a lecture. Point people to the glossary link for full definitions
+- Walk the chain of meaning: text -> embedding (a vector) -> stored in a vector database -> found via vector search -> optionally fed to an LLM (that's RAG)
+- Emphasize the honesty of the second box: we are NOT building a full RAG chatbot today. We're proving the piece that matters for a database talk — storing and searching vectors
+- The two demos coming up (Demo 4 = HNSW, Demo 5 = DiskANN) are the concrete payoff of these terms
+- ANN is the umbrella idea behind both HNSW and DiskANN — we'll unpack those two next
+- If short on time, you can skip reading every bullet and just say "here are the words; the ones in green are what we'll demo"
+- All terms link to the online glossary (glossary.html) for anyone following along on the repo
 -->
 
 ---
@@ -866,5 +925,102 @@ Presenter Notes:
 - Final reminder: scan the QR code to grab all the slides, demo projects, and resources
 - This is the same repo from the opening "Follow Along" slide; everything is there to try at home
 -->
+
+---
+
+# **Appendix: Glossary 📖**
+
+## Plain-English definitions for the AI, vector, and database terms in this talk
+
+Use these reference slides after the talk — or read them online at
+### [desinole.github.io/azure-documentdb/glossary.html](https://desinole.github.io/azure-documentdb/glossary.html)
+
+<!--
+Presenter Notes:
+- This is a reference appendix — you won't walk through it live, but it's here for anyone reviewing the deck later
+- All the same definitions are hosted online at glossary.html, linked throughout the talk
+- Point folks here if they ask "what did that term mean again?"
+
+- THE AI TERMS AS ONE STORY (say it in ~30 seconds if asked to tie it together):
+  Computers compare text, not meaning. So we turn each piece of content — a sentence, image, or audio clip — into an *embedding*: a *vector*, just a list of numbers whose length is its *dimensions*. Similar content lands on similar vectors, and *cosine similarity* scores how close two are. Put those vectors in a *vector database* and you get *vector search* — *semantic search* that returns "sofa" when you ask for "couch." That retrieval step is the engine behind *RAG*: fetch the most relevant documents by vector, hand them to an *LLM*, and it answers grounded in your own data. At scale, checking every vector is too slow, so *ANN* algorithms trade a sliver of *recall* for huge speed — *IVF* clusters vectors, *HNSW* builds an in-memory navigation graph, and *DiskANN* moves that graph to SSD, using *product quantization* to keep a compressed copy in RAM, so it scales to billions of vectors cheaply. DocumentDB uses DiskANN.
+-->
+
+---
+
+# **Glossary: Embeddings & Vectors 📖**
+
+- **Embedding** — a list of numbers that captures the meaning of text, an image, or audio. Similar content produces similar embeddings.
+- **Vector** — an ordered list of numbers. In AI, an embedding *is* a vector; each number is a coordinate in high-dimensional space.
+- **Dimensions** — how many numbers a vector holds. OpenAI's text-embedding-3-small uses 1,536.
+- **Cosine similarity** — measures the angle between two vectors. Near 1 = very similar, near 0 = unrelated. The default scoring metric.
+
+<!--
+Presenter Notes:
+- Foundation terms: text becomes an embedding (a vector of N dimensions)
+- Cosine similarity is the most common way vector search scores "closeness"
+-->
+
+---
+
+# **Glossary: Search & Retrieval 📖**
+
+- **Vector search** — finds the items whose vectors sit closest to a query vector. Ranks by meaning, not exact keywords.
+- **Semantic search** — matches on meaning. "couch" can return "sofa" because their embeddings are close.
+- **Vector database** — stores embeddings and searches them at scale. DocumentDB adds this to your existing document store.
+- **LLM (large language model)** — an AI model trained on huge amounts of text to understand and generate language (e.g. GPT-4, Llama).
+- **RAG (retrieval-augmented generation)** — feeds an LLM relevant documents from your own data before it answers. Vector search does the retrieval.
+
+<!--
+Presenter Notes:
+- RAG = retrieval (vector search) + generation (the LLM); DocumentDB provides the vector database piece
+- Semantic search is the user-facing payoff of vector search
+-->
+
+---
+
+# **Glossary: Index Algorithms 📖**
+
+- **ANN (approximate nearest neighbor)** — trades a little accuracy for a large speed gain, without checking every record.
+- **IVF (inverted file index)** — groups vectors into clusters; a query searches only the nearest clusters.
+- **HNSW (hierarchical navigable small world)** — a multi-layer graph. Fast and precise, but keeps the whole index in memory.
+- **DiskANN** — a graph-based ANN from Microsoft Research that stores the index on SSD. Scales to billions of vectors. DocumentDB uses it.
+- **Product quantization** — compresses vectors into a small code. DiskANN keeps these in memory, then reads full vectors from disk.
+
+<!--
+Presenter Notes:
+- ANN is the umbrella; IVF, HNSW, DiskANN are implementations with different tradeoffs
+- DocumentDB supports HNSW (in-memory) and DiskANN (SSD) — Demos 4 and 5
+- Product quantization is what makes DiskANN's memory footprint small
+-->
+
+---
+
+# **Glossary: Documents & Transactions 📖**
+
+- **BSON** — binary JSON, the format MongoDB and DocumentDB use to store documents. More data types than plain JSON, faster to scan.
+- **ACID** — atomicity, consistency, isolation, durability. The guarantees that keep a transaction correct even when something fails.
+- **Aggregation pipeline** — runs documents through stages (filter, group, sort, transform) to express complex queries and analytics.
+- **Recall** — the share of the true nearest neighbors a search returns. Higher = more accurate. ANN aims for high recall while staying fast.
+
+<!--
+Presenter Notes:
+- BSON, ACID, and the aggregation pipeline came up in the CRUD and query demos
+- Recall is how you measure whether your ANN index is accurate enough
+-->
+
+---
+
+# **Glossary: Distribution 📖**
+
+- **Wire protocol** — the network format MongoDB drivers use to talk to a server. DocumentDB speaks it, so existing drivers connect with no code changes.
+- **Sharding** — splits a collection across many nodes using a shard key. Each node holds part of the data, enabling horizontal scale-out.
+- **Geo-replication** — copies your data to other regions. Cuts read latency for distant users and survives a region outage.
+
+<!--
+Presenter Notes:
+- Wire protocol is why existing MongoDB drivers "just work" against DocumentDB
+- Sharding and geo-replication cover the distributed-scale and resilience story from the architecture section
+-->
+
 
 

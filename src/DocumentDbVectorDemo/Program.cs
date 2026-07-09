@@ -27,15 +27,15 @@ settings.SslSettings = new SslSettings
 settings.ServerSelectionTimeout = TimeSpan.FromMinutes(5);
 var client = new MongoClient(settings);
 var db = client.GetDatabase("sampledb");
-var collection = db.GetCollection<BsonDocument>("products");
+var collection = db.GetCollection<BsonDocument>("inventory");
 
 // --- Step 1: Create an HNSW vector index ---
-Console.WriteLine("Creating HNSW vector index on 'products' collection...");
+Console.WriteLine("Creating HNSW vector index on 'inventory' collection...");
 
 var createIndex = new BsonDocument
 {
     // Target collection to create the index on (must match the collection used for insert/search)
-    { "createIndexes", "products" },
+    { "createIndexes", "inventory" },
     { "indexes", new BsonArray
         {
             new BsonDocument
@@ -111,7 +111,7 @@ void InsertRecords()
         "Office", "Baby", "Pharmacy", "Seasonal", "Hardware"
     };
 
-    var products = new Dictionary<string, string[]>
+    var inventory = new Dictionary<string, string[]>
     {
         ["Electronics"] = ["television", "laptop", "tablet", "headphones", "speaker", "camera", "monitor", "keyboard", "mouse", "charger", "power strip", "surge protector", "flash drive", "memory card", "smart watch", "streaming device", "drone", "projector", "webcam", "microphone"],
         ["Furniture"] = ["sofa", "recliner", "bookshelf", "desk", "dining table", "office chair", "nightstand", "dresser", "futon", "coffee table", "bar stool", "filing cabinet", "tv stand", "shoe rack", "storage bench", "folding table", "bean bag", "step stool", "coat rack", "end table"],
@@ -144,7 +144,7 @@ void InsertRecords()
     var words = Enumerable.Range(0, totalRecords).Select(_ =>
     {
         var dept = faker.PickRandom(departments);
-        return faker.PickRandom(products[dept]);
+        return faker.PickRandom(inventory[dept]);
     }).ToList();
 
     // Deduplicate while preserving count by appending a variant when needed
