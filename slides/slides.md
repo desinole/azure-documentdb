@@ -64,14 +64,14 @@ Presenter Notes:
 1. 🏗️ What is DocumentDB & why it matters
 2. 🐳 **Demo:** Local setup, CRUD & querying
 3. 🤖 Vector search & AI fundamentals
-4. 🔍 **Demo:** Vector search with HNSW & DiskANN
+4. 🔍 **Demo:** HNSW in open source and DiskANN in Azure
 
 <!--
 Presenter Notes:
 - Give the audience a quick map of the talk
 - Point out the live demos
 - Mention the talk will go from concepts to hands-on in about 45 minutes
-- There are 2 vector search demos: HNSW in memory and DiskANN on SSD
+- There are 2 vector search demos: HNSW in the open-source build and DiskANN in Azure DocumentDB
 - The vector section is for people building AI and ML applications
 -->
 
@@ -491,7 +491,7 @@ Presenter Notes:
 
 ### 👀 Today's demos
 
-✅ **Embeddings + vector database + vector search:** DocumentDB stores and searches vectors with <a href="https://desinole.github.io/azure-documentdb/glossary.html#hnsw" target="_blank"><strong>HNSW</strong></a> (Demo 4) and <a href="https://desinole.github.io/azure-documentdb/glossary.html#diskann" target="_blank"><strong>DiskANN</strong></a> (Demo 5)
+✅ **Embeddings + vector database + vector search:** open-source DocumentDB uses <a href="https://desinole.github.io/azure-documentdb/glossary.html#hnsw" target="_blank"><strong>HNSW</strong></a> (Demo 4); Azure DocumentDB adds <a href="https://desinole.github.io/azure-documentdb/glossary.html#diskann" target="_blank"><strong>DiskANN</strong></a> (Demo 5)
 
 📌 **RAG & LLMs:** the demos cover retrieval; generation is outside this talk
 
@@ -501,7 +501,7 @@ Presenter Notes:
 - Keep this to 60 seconds and point to the glossary for details
 - The sequence is text, embedding, vector search, retrieved document, then optional LLM generation
 - The demos cover storage and retrieval
-- Demo 4 uses HNSW. Demo 5 covers DiskANN
+- Demo 4 uses HNSW in open-source DocumentDB. Demo 5 covers DiskANN in Azure DocumentDB
 - ANN is the category that includes IVF, HNSW, and DiskANN
 - If time is short, read the terms used in the demos and move on
 - All terms link to the online glossary (glossary.html) for anyone following along on the repo
@@ -534,7 +534,7 @@ Presenter Notes:
 ### <a href="https://desinole.github.io/azure-documentdb/glossary.html#hnsw" target="_blank"><strong>HNSW:</strong></a> hierarchical navigable small world
 Builds a **multi-layer graph** of connections between vectors (think express lanes on a highway). Top layers have long-distance links for fast traversal; bottom layers have fine-grained links for precision. The full graph stays **in memory**.
 
-### <a href="https://desinole.github.io/azure-documentdb/glossary.html#diskann" target="_blank"><strong>DiskANN:</strong></a> disk-based ANN *(used by DocumentDB)*
+### <a href="https://desinole.github.io/azure-documentdb/glossary.html#diskann" target="_blank"><strong>DiskANN:</strong></a> disk-based ANN *(Azure DocumentDB only)*
 DiskANN stores most of its graph **on SSD**. <a href="https://desinole.github.io/azure-documentdb/glossary.html#product-quantization" target="_blank">Product quantization</a> keeps a compressed routing structure in memory, then the search reads full vectors from disk. **It can handle billions of vectors.**
 
 <!--
@@ -549,7 +549,32 @@ Presenter Notes:
 -->
 
 ---
-# **Vector search with DiskANN 🧠**
+# **Vector search with HNSW 🧠**
+
+## HNSW in open-source DocumentDB
+
+- Included in the **open-source DocumentDB** build
+- Works with the local `documentdb-local` container
+- Keeps its graph **in memory**
+- Suits datasets whose index fits in available RAM
+- Tune recall and build cost with `m` and `efConstruction`
+
+### When to use it
+
+Use HNSW when query latency matters and the vector index fits in memory.
+
+<!--
+Presenter Notes:
+- HNSW is the vector index used by the open-source demo in this talk
+- Each vector is a node connected to nearby vectors
+- The graph stays in memory, which gives fast traversal
+- `m` controls the number of graph connections per vector
+- `efConstruction` controls how much work is spent building the graph
+- Example: "A product catalog with an index that fits in RAM is a good HNSW workload."
+-->
+
+---
+# **Vector search with DiskANN: Azure only 🧠**
 
 ## What is DiskANN?
 
@@ -557,27 +582,30 @@ Presenter Notes:
 - Developed by **Microsoft Research**
 - Graph index for <a href="https://desinole.github.io/azure-documentdb/glossary.html#vector-search" target="_blank"><strong>large vector collections</strong></a>
 - Handles **billions of vectors** while keeping most data on SSD
-- Open source: [github.com/microsoft/DiskANN](https://github.com/microsoft/DiskANN)
+- The DiskANN algorithm is open source: [github.com/microsoft/DiskANN](https://github.com/microsoft/DiskANN)
 
-### How it works
+### DocumentDB availability
 
-**DiskANN stores most of the index on SSD** and keeps a smaller routing structure in memory.
+**DocumentDB's DiskANN index is Azure-only today.**
+
+Open-source DocumentDB and `documentdb-local` provide HNSW and IVF.
 
 <!--
 Presenter Notes:
 - DiskANN stands for Disk-based Approximate Nearest Neighbor
 - Microsoft Research created DiskANN
+- The DiskANN algorithm has an open-source repository
+- Its DocumentDB index implementation is currently available through Azure DocumentDB
+- Open-source DocumentDB provides HNSW and IVF; Azure DocumentDB adds DiskANN
 - Its graph index reads candidates from SSD
 - HNSW keeps its graph in memory
 - DiskANN achieves comparable recall and latency while using a fraction of the memory
 - Published at NeurIPS 2019 - one of the top ML/AI conferences
-- Open source on GitHub: github.com/microsoft/DiskANN
-- Now rewritten in Rust for performance and safety
 -->
 
 ---
 
-# **Vector search with DiskANN**
+# **Vector search with DiskANN: Azure only**
 
 ## Why DiskANN in DocumentDB?
 
@@ -599,7 +627,7 @@ Presenter Notes:
 
 ---
 
-# **Vector search with DiskANN**
+# **Vector search with DiskANN: Azure only**
 
 ### Use cases
 
@@ -623,7 +651,7 @@ Presenter Notes:
 
 | Feature | **DocumentDB** | **Pinecone** | **Weaviate** | **Qdrant** | **Milvus** | **pgvector** |
 |---------|---------------|-------------|-------------|-----------|-----------|-------------|
-| **Index** | DiskANN | Closed source | HNSW | HNSW | Multiple | HNSW/IVF |
+| **Index** | HNSW (open source) + DiskANN (Azure) | Closed source | HNSW | HNSW | Multiple | HNSW/IVF |
 | **Self-Host** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Scale** | 500K+ vectors | Large | Medium | Medium | Large | Small |
 | **Memory** | Low (SSD) | Managed | High | High | High | High |
@@ -632,7 +660,7 @@ Presenter Notes:
 
 <!--
 Presenter Notes:
-- DocumentDB combines a DiskANN index, document storage, a MongoDB API, and SQL access
+- Open-source DocumentDB supports HNSW; Azure DocumentDB adds DiskANN
 - Pinecone is managed, closed source, and focused on vector workloads
 - Weaviate runs as a separate service
 - Qdrant is a standalone Rust service
@@ -723,7 +751,7 @@ Presenter Notes:
 
 ---
 
-# **Demo 5a: Create a DiskANN index 🔍**
+# **Demo 5a: Create a DiskANN index in Azure 🔍**
 
 ## Create a DiskANN vector index
 
@@ -750,7 +778,7 @@ db.RunCommand<BsonDocument>(createIndex);
 
 <!--
 Presenter Notes:
-- Scope note: DiskANN is a managed Azure DocumentDB capability and is not included in the open-source `documentdb-local` build
+- Scope note: DocumentDB's DiskANN index is available through the managed Azure DocumentDB service
 - `createIndexes` targets the `products` collection, and `name` gives the index a stable identifier
 - `embedding: "cosmosSearch"` marks the field as vector-searchable
 - `kind: "vector-diskann"` asks the managed service to build its SSD-oriented DiskANN index
@@ -764,7 +792,7 @@ Presenter Notes:
 
 ---
 
-# **Demo 5b: Search a DiskANN index 🔍**
+# **Demo 5b: Search a DiskANN index in Azure 🔍**
 
 ## Run a similarity search
 
@@ -789,7 +817,7 @@ var results = collection.Aggregate<BsonDocument>(searchPipeline).ToList();
 
 <!--
 Presenter Notes:
-- Scope note: run this comparison only against the managed Azure service because the open-source local build does not provide DiskANN
+- Scope note: run this comparison against the managed Azure DocumentDB service
 - The query shape matches the HNSW example because both indexes accept the same path, query vector, and top-k request
 - `path` selects the stored embedding, `vector` supplies the query embedding, and `k` requests ten candidates
 - `$project` returns the product word and score, leaving out the large embedding array
